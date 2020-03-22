@@ -62,8 +62,8 @@ describe("users", () => {
     );
   });
 
-  test("should allow creation of a new user github oauth account", () => {
-    User.findOrCreateGithub(profileData, (user) => {
+  test("should allow creation of a new user github oauth account", async () => {
+    await User.findOrCreateGithub(profileData, (user) => {
       expect(user).toHaveProperty("githubId", 1);
       expect(user).toHaveProperty("username", "githubTest1");
     });
@@ -75,7 +75,7 @@ describe("users", () => {
     newUser.color = "test";
     newUser.email = "test1@test.com";
     await newUser.save();
-    User.findOrCreateGithub(profileData, (user) => {
+    await User.findOrCreateGithub(profileData, (user) => {
       expect(user).toHaveProperty("githubId", 1);
       expect(user).toHaveProperty("username", "githubTest2");
     });

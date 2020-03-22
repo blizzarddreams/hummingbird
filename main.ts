@@ -47,6 +47,6 @@ app.use("/", router);
 const io = socketio(server);
 websocket(io);
 
-server.listen(process.env.PORT, () =>
-  console.log(`Listening on port ${process.env.PORT}`),
+server.listen(process.env.PORT || 8000, () =>
+  console.log(`Listening on port ${process.env.PORT || 8000}`),
 );

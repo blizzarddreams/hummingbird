@@ -10,7 +10,7 @@ import http from "http";
 import redis from "redis";
 import socketio from "socket.io";
 import cors from "cors";
-import passport from "./authorization";
+import passport from "./authentication";
 import db from "./db";
 import router from "./routes";
 import websocket from "./websocket";

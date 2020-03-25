@@ -76,14 +76,12 @@ $(() => {
     }
   });
 
-  $(".hummingbird-new-message").on("keyup", (e) => {
+  $(".new-message").on("keyup", (e) => {
     if (e.keyCode === 13) {
-      // enter
-      // $(".messagelist").scrollTop($(".messagelist").prop("scrollHeight"));
-      const inputData = $(".hummingbird-new-message").val();
+      const inputData = $(".new-message").val();
 
       socket.emit("new message", { room: currentRoom, message: inputData });
-      $(".hummingbird-new-message").val("");
+      $(".new-message").val("");
     }
   });
 
@@ -152,7 +150,6 @@ ${data.message}
         addUsersToUserlist(roomUsers[data.room]);
       }
     }
-    //  $(".userlist-count").html(roomUsers[data.room].length);
   });
 
   socket.on("a different user is disconnecting", (data) => {

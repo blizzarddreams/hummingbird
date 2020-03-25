@@ -13,7 +13,7 @@ interface RequestUser {
 
 router.get("/", (req, res) => {
   if (req.user) {
-    res.render("hummingbird");
+    res.render("app");
   } else {
     res.render("home", { auth: req.user });
   }

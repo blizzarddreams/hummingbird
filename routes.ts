@@ -40,7 +40,7 @@ router.post("/register", (req, res) => {
   user.password = req.body.password;
   user.username = req.body.username;
   user.email = req.body.email;
-  user.color = randomcolor({ hue: "blue" });
+  user.color = randomcolor();
   validate(user, { validationError: { target: false } }).then(
     async (errors) => {
       if (errors.length > 0) {
@@ -57,7 +57,6 @@ router.post("/register", (req, res) => {
           await user.save();
           return res.redirect("/");
         } catch (e) {
-          console.log(e);
           if (e.name === "QueryFailedError") {
             const errorMessage: string = e.detail
               .split("=")[1]
@@ -102,26 +101,70 @@ router.post("/settings", async (req, res) => {
   const user = await User.findOne({
     username: (req.user as RequestUser).username,
   });
+  const username = req.body.username.trim();
   const oldPassword = req.body["old-password"].trim();
   const newPassword = req.body["new-password"].trim();
   const newPasswordConfirm = req.body["new-password-confirm"].trim();
-  const arePasswordsNotEmpty: boolean = [
+  const arePasswordsEmpty: boolean = [
     oldPassword,
     newPassword,
     newPasswordConfirm,
   ].every((password) => {
-    return password.length !== 0;
+    return password.length >= 8;
   });
-  if (arePasswordsNotEmpty) {
+  // if username exists, check to see if it is valid.
+  // if username is not valid, then redirect to settings.
+  // if it is, but passwords are not empty, only update the username.
+  // if it is, and the passwords are empty, then update the username, and save the user.
+  if (username.length >= 1) {
+    user.username = username;
+    validate(user, { validationError: { target: false } }).then(
+      async (errors) => {
+        if (errors.length > 0) {
+          const errorsList = errors.flatMap((x) => {
+            return Object.values(x.constraints);
+          });
+          req.flash("errors", errorsList);
+          return res.redirect("/settings");
+        }
+        if (arePasswordsEmpty) {
+          try {
+            await user.save();
+            return res.redirect("/");
+          } catch (e) {
+            if (e.name === "QueryFailedError") {
+              const errorMessage: string = e.detail
+                .split("=")[1]
+                .replace(/()/g, "");
+              req.flash("errors", [errorMessage]);
+              console.log(errorMessage);
+            }
+            return res.redirect("/settings");
+          }
+        }
+      },
+    );
+  }
+  if (!arePasswordsEmpty) {
     bcrypt.compare(oldPassword, user.password, (err, res_) => {
-      if (err) return err;
-      if (!res_) return err;
+      if (err) return res.redirect("/settings");
+      if (!res_) return res.redirect("/settings");
       if (newPassword === newPasswordConfirm) {
         bcrypt.hash(newPassword, 10, async (err_, hash) => {
-          if (err_) return err_;
+          if (err_) return res.redirect("/settings");
           user.password = hash;
-          await user.save();
-          return res.redirect("/settings");
+          try {
+            await user.save();
+            return res.redirect("/");
+          } catch (e) {
+            if (e.name === "QueryFailedError") {
+              const errorMessage: string = e.detail
+                .split("=")[1]
+                .replace(/()/g, "");
+              req.flash("errors", [errorMessage]);
+            }
+            return res.redirect("/register");
+          }
         });
       }
     });

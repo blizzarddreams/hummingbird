@@ -8,6 +8,7 @@ import session from "express-session";
 import helmet from "helmet";
 import http from "http";
 import redis from "redis";
+import flash from "express-flash";
 import socketio from "socket.io";
 import cors from "cors";
 import passport from "./authentication";
@@ -28,6 +29,7 @@ app.set("views", "views");
 app.set("view engine", "handlebars");
 app.use(helmet());
 app.use(cors());
+app.use(flash());
 app.use("/", express.static("dist"));
 app.use(
   session({
@@ -37,6 +39,7 @@ app.use(
     saveUninitialized: false,
   }),
 );
+
 app.use(body.json());
 app.use(body.urlencoded({ extended: true }));
 app.use(cookie());

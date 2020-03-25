@@ -1,5 +1,10 @@
 <div class="row d-flex justify-content-center">
   <div class="col-6">
+    {{#if messages.errors}}
+    {{#each messages.errors}}
+    <p>{{this}}</p>
+    {{/each}}
+    {{/if}}
     <h1>Register</h1>
     <form method="POST" action="/register" class="login">
       <div class="form-group">

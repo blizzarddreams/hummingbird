@@ -9,7 +9,7 @@ import {
 import { MinLength, IsNotEmpty } from "class-validator";
 
 import User from "./User";
-import { Channel } from ".";
+import Channel from "./Channel";
 
 @Entity()
 export default class Message extends BaseEntity {

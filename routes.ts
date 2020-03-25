@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import randomcolor from "randomcolor";
 import passport from "passport";
+import { validate } from "class-validator";
 import { User } from "./models";
 
 const router = express.Router();
@@ -35,20 +36,39 @@ router.get("/register", (req, res) => {
 });
 
 router.post("/register", (req, res) => {
-  bcrypt.hash(req.body.password, 10, async (err, hash) => {
-    if (err) return false;
-    const user = new User();
-    user.username = req.body.username;
-    user.email = req.body.email;
-    user.password = hash;
-    user.color = randomcolor({ hue: "blue" });
-    try {
-      await user.save();
-      return res.redirect("/");
-    } catch (e) {
-      return res.redirect("/register");
-    }
-  });
+  const user = new User();
+  user.password = req.body.password;
+  user.username = req.body.username;
+  user.email = req.body.email;
+  user.color = randomcolor({ hue: "blue" });
+  validate(user, { validationError: { target: false } }).then(
+    async (errors) => {
+      if (errors.length > 0) {
+        const errorsList = errors.flatMap((x) => {
+          return Object.values(x.constraints);
+        });
+        req.flash("errors", errorsList);
+        return res.redirect("/register");
+      }
+      bcrypt.hash(req.body.password, 10, async (err, hash) => {
+        if (err) return false;
+        user.password = hash;
+        try {
+          await user.save();
+          return res.redirect("/");
+        } catch (e) {
+          console.log(e);
+          if (e.name === "QueryFailedError") {
+            const errorMessage: string = e.detail
+              .split("=")[1]
+              .replace(/()/g, "");
+            req.flash("errors", [errorMessage]);
+          }
+          return res.redirect("/register");
+        }
+      });
+    },
+  );
 });
 
 router.post("/authenticated", (req, res) => {

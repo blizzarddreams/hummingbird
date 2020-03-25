@@ -8,7 +8,7 @@ import {
   JoinTable,
   CreateDateColumn,
 } from "typeorm";
-import { MinLength, IsEmail, IsOptional } from "class-validator";
+import { MinLength, IsEmail, IsOptional, IsString } from "class-validator";
 
 import randomcolor from "randomcolor";
 import Message from "./Message";
@@ -25,6 +25,7 @@ export default class User extends BaseEntity {
 
   @Column({ nullable: true })
   @MinLength(8)
+  @IsString()
   @IsOptional()
   password: string;
 

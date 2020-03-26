@@ -34,7 +34,7 @@ app.use("/", express.static("dist"));
 app.use(
   session({
     store: new RedisStore({ client }),
-    secret: process.env.SECRET_KEY,
+    secret: process.env.SECRET_KEY as string,
     resave: false,
     saveUninitialized: false,
   }),

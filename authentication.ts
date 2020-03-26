@@ -11,7 +11,7 @@ const LocalStrategy = passportLocal.Strategy;
 
 passport.use(
   new LocalStrategy((username: string, password: string, done) => {
-    User.findOne({ username }).then((user: User) => {
+    User.findOne({ username }).then((user: User | undefined) => {
       if (!user) return done(null, false);
       bcrypt.compare(password, user.password, (err, res) => {
         if (!res) return done(null, false);
@@ -24,15 +24,13 @@ passport.use(
 passport.use(
   new GithubStrategy(
     {
-      clientID: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      clientID: process.env.GITHUB_CLIENT_ID as string,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
       callbackURL: process.env.GITHUB_CLIENT_URL,
       scope: ["user:email"],
     },
     (accessToken, refreshToken, profile, cb) => {
-      User.findOrCreateGithub(profile, (user) => {
-        return cb(undefined, user);
-      });
+      User.findOrCreateGithub(profile, (user: User) => cb(undefined, user));
     },
   ),
 );
@@ -40,25 +38,22 @@ passport.use(
 passport.use(
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CLIENT_URL,
+      clientID: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      callbackURL: process.env.GOOGLE_CLIENT_URL as string,
       scope: ["openid profile email"],
     },
     (accessToken, refreshToken, profile, cb) => {
-      User.findOrCreateGoogle(profile, (user) => {
-        return cb(undefined, user);
-      });
+      User.findOrCreateGoogle(profile, (user: User) => cb(undefined, user));
     },
   ),
 );
 
-passport.serializeUser((user: User, done) => {
-  return done(null, user.id);
-});
+passport.serializeUser((user: User, done) => done(null, user.id));
 
-passport.deserializeUser((id, done) => {
-  return User.findOne(id).then((user) => done(null, user));
+passport.deserializeUser(async (id, done) => {
+  const user = await User.findOne(id as string);
+  return done(null, user);
 });
 
 export default passport;

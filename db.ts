@@ -1,7 +1,5 @@
 import { createConnection } from "typeorm";
 
-export default (): void => {
-  createConnection()
-    .then()
-    .catch((e) => console.log(e));
+export default async (): Promise<void> => {
+  await createConnection();
 };

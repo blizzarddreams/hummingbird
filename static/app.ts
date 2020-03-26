@@ -53,21 +53,29 @@ $(() => {
     currentRoom = room;
     if (roomMessages[room]) {
       roomMessages[room].forEach((data) => {
+        /* eslint-disable indent */
+
         $(".messagelist").append(
           `
-<li class="list-group-item message w-100">
-<ul class="row list-group list-group-flush list-group-horizontal col-12 mb-1 message">
-<li class="col-12 list-group-item avatar-box">
-<img class="message-avatar" src="${data.user.avatar_path}"></img>
-
-<b><span style="color:${data.user.color}">${data.user.username}</span>
-- ${moment(data.created_at).format("H:mm:ss")}</b>${data.message}
-</li>
-</ul>
-</li>
+        <li class="list-group-item message w-100">
+          <ul class="row list-group list-group-flush list-group-horizontal col-12 mb-1 message">
+            <li class="col-12 list-group-item avatar-box">
+              <img class="message-avatar" src="${data.user.gravatar}"></img>
+              <b>
+                <span style="color:${data.user.color}">${
+            data.user.username
+          }</span>
+                <span>- ${moment(data.created_at).format("H:mm:ss")}</b>${
+            data.message
+          }</span>
+              </b>
+            </li>
+          </ul>
+        </li>
             `,
         );
       });
+      /* eslint-enable indent */
       scrollToBottom();
     }
 

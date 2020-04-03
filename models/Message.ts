@@ -24,21 +24,13 @@ export default class Message extends BaseEntity {
   @CreateDateColumn({ nullable: true })
   createdAt: Date;
 
-  @ManyToOne(
-    () => User,
-    (user) => user.messages,
-    {
-      onDelete: "CASCADE",
-    },
-  )
+  @ManyToOne(() => User, (user) => user.messages, {
+    onDelete: "CASCADE",
+  })
   user: User;
 
-  @ManyToOne(
-    () => Channel,
-    (channel) => channel.messages,
-    {
-      onDelete: "CASCADE",
-    },
-  )
+  @ManyToOne(() => Channel, (channel) => channel.messages, {
+    onDelete: "CASCADE",
+  })
   channel: Channel;
 }

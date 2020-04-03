@@ -25,10 +25,10 @@ export default (io): void => {
     };
   }
 
-  async function userList(room: string): Promise<any[]> {
+  async function userList(room: string): Promise<UserData[]> {
     return new Promise((resolve) => {
       io.in(room).clients(async (err, clients) => {
-        const userListData: Promise<any[]> = Promise.all(
+        const userListData: Promise<UserData[]> = Promise.all(
           clients.map(async (user: string) => {
             const userName: string = io.sockets.connected[user].username;
             const data: UserData = await userData(userName);

@@ -27,10 +27,7 @@ $(() => {
   }
 
   function addUsersToUserlist(data: any): void {
-    $(".userlist")
-      .find("*")
-      .not(".userlist-count")
-      .remove();
+    $(".userlist").find("*").not(".userlist-count").remove();
     data.sort((x, y) => x.username < y.username);
     data.forEach((user: User) => {
       $(".userlist").append(
@@ -43,9 +40,7 @@ $(() => {
   }
 
   $(document).on("click", ".channel", (e: any): void => {
-    $(".channellist")
-      .children()
-      .removeClass("active");
+    $(".channellist").children().removeClass("active");
     $(e.target).addClass("active");
     const room = $(e.target).attr("room");
 

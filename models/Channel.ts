@@ -19,22 +19,14 @@ export default class Channel extends BaseEntity {
   @Column({ unique: true })
   name: string;
 
-  @ManyToMany(
-    () => User,
-    (user) => user.channels,
-    {
-      onDelete: "CASCADE",
-    },
-  )
+  @ManyToMany(() => User, (user) => user.channels, {
+    onDelete: "CASCADE",
+  })
   users: User[];
 
-  @OneToMany(
-    () => Message,
-    (message) => message.channel,
-    {
-      onDelete: "CASCADE",
-    },
-  )
+  @OneToMany(() => Message, (message) => message.channel, {
+    onDelete: "CASCADE",
+  })
   messages: Message[];
 
   @CreateDateColumn({ nullable: true })

@@ -45,22 +45,14 @@ export default class User extends BaseEntity {
   @CreateDateColumn({ nullable: true })
   createdAt: Date;
 
-  @OneToMany(
-    () => Message,
-    (message) => message.user,
-    {
-      onDelete: "CASCADE",
-    },
-  )
+  @OneToMany(() => Message, (message) => message.user, {
+    onDelete: "CASCADE",
+  })
   messages: Message[];
 
-  @ManyToMany(
-    () => Channel,
-    (channel) => channel.users,
-    {
-      onDelete: "CASCADE",
-    },
-  )
+  @ManyToMany(() => Channel, (channel) => channel.users, {
+    onDelete: "CASCADE",
+  })
   @JoinTable()
   channels: Channel[];
 

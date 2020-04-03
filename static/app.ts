@@ -1,4 +1,7 @@
-declare let moment: any;
+import "bootstrap";
+import $ from "jquery";
+import moment from "moment";
+import io from "socket.io-client";
 $(() => {
   function scrollToBottom(): void {
     const messageListContainer: Element = document.getElementsByClassName(

@@ -11,13 +11,14 @@ module.exports = {
     path.join(__dirname, "static/app.ts"),
   ],
   resolve: {
-    extensions: [".ts"],
+    extensions: [".ts", ".js"], // this
   },
-
+  devtool: "",
   plugins: [
     new MiniCssExtractPlugin({
       filename: "[name].css",
     }),
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
   ],
 
   optimization: {

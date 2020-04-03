@@ -14,23 +14,23 @@ import Channel from "./Channel";
 @Entity()
 export default class Message extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
   @MinLength(1)
   @IsNotEmpty()
-  data: string;
+  data!: string;
 
   @CreateDateColumn({ nullable: true })
-  createdAt: Date;
+  createdAt!: Date;
 
   @ManyToOne(() => User, (user) => user.messages, {
     onDelete: "CASCADE",
   })
-  user: User;
+  user!: User;
 
   @ManyToOne(() => Channel, (channel) => channel.messages, {
     onDelete: "CASCADE",
   })
-  channel: Channel;
+  channel!: Channel;
 }

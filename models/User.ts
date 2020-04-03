@@ -8,57 +8,83 @@ import {
   JoinTable,
   CreateDateColumn,
 } from "typeorm";
+
+import passportGoogle from "passport-google-oauth20";
+import passportGithub from "passport-github2";
+
 import { MinLength, IsEmail, IsOptional, IsString } from "class-validator";
 
 import randomcolor from "randomcolor";
 import Message from "./Message";
 import Channel from "./Channel";
 
+interface GithubProfile extends passportGithub.Profile {
+  emails: [
+    {
+      primary?: boolean;
+      verified?: boolean;
+      value: string;
+    },
+  ];
+  id: string;
+  username: string;
+  displayName: string;
+}
+
+interface GoogleProfile extends passportGoogle.Profile {
+  emails?: { value: string; type?: string | undefined }[] | undefined;
+  id: string;
+  username?: string;
+  displayName: string;
+}
 @Entity()
 export default class User extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ unique: true })
   @MinLength(1)
-  username: string;
+  username!: string;
 
   @Column({ nullable: true })
   @MinLength(8)
   @IsString()
   @IsOptional()
-  password: string;
+  password!: string;
 
   @Column({ nullable: true, unique: true })
   @IsEmail()
-  email: string;
+  email!: string;
 
   @Column({ nullable: true, unique: true })
-  githubId: string;
+  githubId!: string;
 
   @Column({ nullable: true, unique: true })
-  googleId: string;
+  googleId!: string;
 
   @Column()
-  color: string;
+  color!: string;
 
   @CreateDateColumn({ nullable: true })
-  createdAt: Date;
+  createdAt!: Date;
 
   @OneToMany(() => Message, (message) => message.user, {
     onDelete: "CASCADE",
   })
-  messages: Message[];
+  messages!: Message[];
 
   @ManyToMany(() => Channel, (channel) => channel.users, {
     onDelete: "CASCADE",
   })
   @JoinTable()
-  channels: Channel[];
+  channels!: Channel[];
 
-  static async findOrCreateGithub(profile, next): Promise<void> {
-    const email = profile.emails.filter((x) => x.primary)[0].value;
-    let user: User = await User.findOne({
+  static async findOrCreateGithub(
+    profile: GithubProfile,
+    next: (user: User) => void,
+  ): Promise<void> {
+    const email = profile.emails.filter((email) => email.primary)[0].value;
+    let user: User | undefined = await User.findOne({
       where: [{ email }, { githubId: profile.id }],
     });
 
@@ -69,7 +95,7 @@ export default class User extends BaseEntity {
       if (user.email === null) {
         user.email = email;
       }
-      if (user.username === null) {
+      if (user.username === null && profile.username !== undefined) {
         user.username = profile.username;
       }
       await user.save();
@@ -78,16 +104,20 @@ export default class User extends BaseEntity {
       user = new User();
       user.color = randomcolor({ hue: "blue" });
       user.githubId = profile.id;
-      user.username = profile.username;
+      user.username = profile.username ?? "";
       user.email = email;
       await user.save();
       next(user);
     }
   }
 
-  static async findOrCreateGoogle(profile, next): Promise<void> {
-    const email: string = profile.emails.filter((x) => x.verified)[0].value;
-    let user: User = await User.findOne({
+  static async findOrCreateGoogle(
+    profile: GoogleProfile,
+    next: (user: User) => void,
+  ): Promise<void> {
+    const email: string =
+      profile.emails?.filter((email) => email)[0].value ?? "";
+    let user: User | undefined = await User.findOne({
       where: [{ email }, { googleId: profile.id }],
     });
 
@@ -104,7 +134,7 @@ export default class User extends BaseEntity {
       user = new User();
       user.color = randomcolor({ hue: "blue" });
       user.githubId = profile.id;
-      user.username = profile.displayName;
+      user.username = profile.displayName ?? "";
       user.email = email;
       await user.save();
       next(user);

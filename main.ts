@@ -9,7 +9,7 @@ import helmet from "helmet";
 import http from "http";
 import redis from "redis";
 import flash from "express-flash";
-import socketio from "socket.io";
+import socketio, { Server } from "socket.io";
 import cors from "cors";
 import passport from "./authentication";
 import db from "./db";
@@ -46,8 +46,10 @@ app.use(cookie());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use("/", router);
-
-const io = socketio(server);
+interface UserServer extends Server {
+  username?: string;
+}
+const io: UserServer = socketio(server);
 websocket(io);
 
 server.listen(process.env.PORT || 8000, () =>

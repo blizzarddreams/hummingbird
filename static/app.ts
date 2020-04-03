@@ -29,9 +29,11 @@ $(() => {
     username: string;
   }
 
-  function addUsersToUserlist(data: any): void {
+  type Userlist = [User];
+
+  function addUsersToUserlist(data: Userlist): void {
     $(".userlist").find("*").not(".userlist-count").remove();
-    data.sort((x, y) => x.username < y.username);
+    data.sort((x, y) => (x.username < y.username ? 1 : -1));
     data.forEach((user: User) => {
       $(".userlist").append(
         `<li class="nav-item user" style="color:${user.color}"><b>${user.username}</b></li>`,
@@ -42,7 +44,7 @@ $(() => {
     );
   }
 
-  $(document).on("click", ".channel", (e: any): void => {
+  $(document).on("click", ".channel", (e: Event): void => {
     $(".channellist").children().removeClass("active");
     $(e.target).addClass("active");
     const room = $(e.target).attr("room");

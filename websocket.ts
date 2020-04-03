@@ -1,5 +1,5 @@
 import sanitizehtml from "sanitize-html";
-import { Socket } from "socket.io";
+import { Server, Socket } from "socket.io";
 import crypto from "crypto";
 import { validate } from "class-validator";
 import { User, Channel, Message } from "./models";
@@ -10,9 +10,13 @@ interface UserData {
   gravatar: string;
 }
 
-export default (io): void => {
-  async function userData(username: string): Promise<UserData> {
-    const user: User = await User.findOne({ username });
+interface UserServer extends Server {
+  username?: string;
+}
+export default (io: UserServer): void => {
+  async function userData(username: string): Promise<UserData | undefined> {
+    const user: User = await User.findOneOrFail({ username });
+
     const hash: string = crypto
       .createHash("md5")
       .update(user.email)
@@ -25,13 +29,14 @@ export default (io): void => {
     };
   }
 
-  async function userList(room: string): Promise<UserData[]> {
+  async function userList(room: string): Promise<(UserData | undefined)[]> {
     return new Promise((resolve) => {
-      io.in(room).clients(async (err, clients) => {
-        const userListData: Promise<UserData[]> = Promise.all(
+      io.in(room).clients(async (err: Error, clients: string[]) => {
+        const userListData: Promise<(UserData | undefined)[]> = Promise.all(
           clients.map(async (user: string) => {
-            const userName: string = io.sockets.connected[user].username;
-            const data: UserData = await userData(userName);
+            const userName: string = (io.sockets.connected[user] as UserSocket)
+              .username;
+            const data: UserData | undefined = await userData(userName);
             return data;
           }),
         );
@@ -47,7 +52,7 @@ export default (io): void => {
   io.on("connection", async (socket: UserSocket) => {
     socket.on("user authorized", async (data) => {
       socket.username = data.username;
-      const user = await User.findOne({
+      const user: User = await User.findOneOrFail({
         where: { username: socket.username },
         relations: ["channels"],
       });
@@ -94,7 +99,7 @@ export default (io): void => {
         const [command, channelName] = messageData;
         switch (command) {
           case "join": {
-            const user = await User.findOne({
+            const user = await User.findOneOrFail({
               where: { username: socket.username },
               relations: ["channels"],
             });
@@ -116,7 +121,7 @@ export default (io): void => {
             break;
           }
           case "leave": {
-            const user = await User.findOne({
+            const user = await User.findOneOrFail({
               where: { username: socket.username },
               relations: ["channels"],
             });
@@ -136,7 +141,7 @@ export default (io): void => {
           default:
         }
       } else {
-        const user: User = await User.findOne({
+        const user: User = await User.findOneOrFail({
           where: { username: socket.username },
           relations: ["channels"],
         });
@@ -166,7 +171,7 @@ export default (io): void => {
 
     socket.on("disconnecting", async () => {
       if (socket.username) {
-        const disconnectingUser: User = await User.findOne({
+        const disconnectingUser: User = await User.findOneOrFail({
           where: { username: socket.username },
           relations: ["channels"],
         });

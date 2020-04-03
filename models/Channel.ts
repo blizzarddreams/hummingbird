@@ -14,23 +14,23 @@ import Message from "./Message";
 @Entity()
 export default class Channel extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ unique: true })
-  name: string;
+  name!: string;
 
   @ManyToMany(() => User, (user) => user.channels, {
     onDelete: "CASCADE",
   })
-  users: User[];
+  users!: User[];
 
   @OneToMany(() => Message, (message) => message.channel, {
     onDelete: "CASCADE",
   })
-  messages: Message[];
+  messages!: Message[];
 
   @CreateDateColumn({ nullable: true })
-  createdAt: Date;
+  createdAt!: Date;
 
   static async findOrCreate(name: string): Promise<Channel> {
     let channel = await Channel.findOne({ name });

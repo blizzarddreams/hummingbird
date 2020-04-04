@@ -4,17 +4,39 @@ import crypto from "crypto";
 import { validate } from "class-validator";
 import { User, Channel, Message } from "./models";
 
-interface UserData {
+interface SocketUser {
   username: string;
   color: string;
   gravatar: string;
 }
 
+interface SocketUserMessage {
+  room: string;
+  message: string;
+  user: SocketUser;
+}
+
+interface SocketUserWithRoom {
+  user: SocketUser;
+  room: string;
+}
+
+interface SocketUserWithRoomAndUserList {
+  user: SocketUser;
+  userlist: UserList;
+  room: string;
+}
+
+interface ConnectedSocketUser extends Socket {
+  username: string;
+}
+
+type UserList = SocketUser[];
 interface UserServer extends Server {
   username?: string;
 }
 export default (io: UserServer): void => {
-  async function userData(username: string): Promise<UserData | undefined> {
+  async function userData(username: string): Promise<SocketUser> {
     const user: User = await User.findOneOrFail({ username });
 
     const hash: string = crypto
@@ -29,14 +51,15 @@ export default (io: UserServer): void => {
     };
   }
 
-  async function userList(room: string): Promise<(UserData | undefined)[]> {
+  async function userList(room: string): Promise<UserList> {
     return new Promise((resolve) => {
       io.in(room).clients(async (err: Error, clients: string[]) => {
-        const userListData: Promise<(UserData | undefined)[]> = Promise.all(
+        const userListData: Promise<UserList> = Promise.all(
           clients.map(async (user: string) => {
-            const userName: string = (io.sockets.connected[user] as UserSocket)
-              .username;
-            const data: UserData | undefined = await userData(userName);
+            const userName: string = (io.sockets.connected[
+              user
+            ] as ConnectedSocketUser).username;
+            const data: SocketUser = await userData(userName);
             return data;
           }),
         );
@@ -45,12 +68,12 @@ export default (io: UserServer): void => {
     });
   }
 
-  interface UserSocket extends Socket {
+  interface Websocket extends Socket {
     username: string;
   }
 
-  io.on("connection", async (socket: UserSocket) => {
-    socket.on("user authorized", async (data) => {
+  io.on("connection", async (socket: Websocket) => {
+    socket.on("user authorized", async (data: { username: string }) => {
       socket.username = data.username;
       const user: User = await User.findOneOrFail({
         where: { username: socket.username },
@@ -58,31 +81,37 @@ export default (io: UserServer): void => {
       });
 
       socket.join("lobby");
-      const lobbyChannel: Channel = await Channel.findOrCreate("lobby");
+      const lobby: Channel = await Channel.findOrCreate("lobby");
 
       if (!user.channels.map((x) => x.name).includes("lobby")) {
-        user.channels.push(lobbyChannel);
+        user.channels.push(lobby);
         await user.save();
       }
 
       user.channels.forEach(async (channel: Channel) => {
         socket.join(channel.name);
-        socket.to(channel.name).emit("a different user joined a room", {
+
+        const differentUserData: SocketUserWithRoom = {
           user: await userData(socket.username),
           room: channel.name,
-        });
-        const userlist = await userList(channel.name);
+        };
+        socket
+          .to(channel.name)
+          .emit("a different user joined a room", differentUserData);
 
-        socket.emit("you joined a room", {
-          user: userData(user.username),
+        const userlist: UserList = await userList(channel.name);
+
+        const currentUserData: SocketUserWithRoomAndUserList = {
+          user: await userData(user.username),
           room: channel.name,
           userlist,
-        });
+        };
+        socket.emit("you joined a room", currentUserData);
       });
       socket.emit("user authorized", await userData(socket.username));
     });
 
-    socket.on("new message", async (data) => {
+    socket.on("new message", async (data: SocketUserMessage) => {
       let messageData: string | string[] = sanitizehtml(data.message, {
         allowedTags: [],
       });
@@ -108,10 +137,12 @@ export default (io: UserServer): void => {
               user.channels.push(channel);
               socket.join(channel.name);
               const userlist = await userList(channel.name);
-              socket.emit("you joined a room", {
+              const currentUserData: SocketUserWithRoomAndUserList = {
+                user: await userData(user.username),
                 room: channel.name,
                 userlist,
-              });
+              };
+              socket.emit("you joined a room", currentUserData);
 
               socket.to(channelName).emit("a different user joined a room", {
                 user: await userData(socket.username),
@@ -175,14 +206,20 @@ export default (io: UserServer): void => {
           where: { username: socket.username },
           relations: ["channels"],
         });
+        const disconnectingUserData: SocketUser = await userData(
+          disconnectingUser.username,
+        );
         const roomsUserWasIn: string[] = disconnectingUser.channels.map(
           (x) => x.name,
         );
         roomsUserWasIn.forEach(async (roomName: string) => {
-          socket.to(roomName).emit("a different user is disconnecting", {
-            user: disconnectingUser,
+          const userDisconnectingData: SocketUserWithRoom = {
+            user: disconnectingUserData,
             room: roomName,
-          });
+          };
+          socket
+            .to(roomName)
+            .emit("a different user is disconnecting", userDisconnectingData);
         });
       }
     });

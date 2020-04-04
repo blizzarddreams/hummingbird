@@ -10,17 +10,18 @@ module.exports = {
     path.join(__dirname, "static/app.scss"),
     path.join(__dirname, "static/app.ts"),
   ],
-  resolve: {
-    extensions: [".ts", ".js"], // this
-  },
+
   devtool: "",
   plugins: [
     new MiniCssExtractPlugin({
       filename: "[name].css",
     }),
+    // @ts-ignore
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
   ],
-
+  resolve: {
+    extensions: [".js", ".ts"],
+  },
   optimization: {
     minimize: true,
     minimizer: [new TerserWebpackPlugin(), new OptimizeCSSAssetsPlugin()],

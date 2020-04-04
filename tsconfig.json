@@ -11,5 +11,6 @@
     "esModuleInterop": true,
     "strict": true
   },
-  "include": ["./*.ts", "./models/*.ts"]
+  "include": ["./*.ts", "./models/*.ts", "./static/*.ts"],
+  "exclude": ["node_modules"]
 }

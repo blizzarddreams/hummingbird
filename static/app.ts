@@ -2,57 +2,99 @@ import "bootstrap";
 import $ from "jquery";
 import moment from "moment";
 import io from "socket.io-client";
-$(() => {
-  function scrollToBottom(): void {
-    const messageListContainer: Element = document.getElementsByClassName(
-      "messagelist-container",
-    )[0];
-    const { scrollHeight, clientHeight } = messageListContainer;
-    messageListContainer.scrollTop = scrollHeight - clientHeight;
-  }
 
-  function toggleNav(): void {
-    $("#channellistSidebar").css("width", "200px");
-    $("body").css("margin-left", "200px");
-  }
+function scrollToBottom(): void {
+  const messageListContainer: Element = document.getElementsByClassName(
+    "messagelist-container",
+  )[0];
+  const { scrollHeight, clientHeight } = messageListContainer;
+  messageListContainer.scrollTop = scrollHeight - clientHeight;
+}
+
+function toggleNav(): void {
+  $("#channellistSidebar").css("width", "200px");
+  $("body").css("margin-left", "200px");
+}
+
+function addUsersToUserlist(data: UserList): void {
+  $(".userlist").find("*").not(".userlist-count").remove();
+  data.sort((x, y) => (x.username < y.username ? 1 : -1));
+  data.forEach((user: SocketUser) => {
+    $(".userlist").append(
+      `<li class="nav-item user" style="color:${user.color}"><b>${user.username}</b></li>`,
+    );
+  });
+  $(".userlist-count").text(
+    `${data.length} ${data.length === 1 ? "User" : "Users"}`,
+  );
+}
+
+interface SocketUser {
+  color: string;
+  username: string;
+  gravatar: string;
+}
+
+interface SocketUserMessage {
+  room: string;
+  message: string;
+  user: SocketUser;
+  created_at?: string;
+}
+
+interface SocketUserWithRoom {
+  user: SocketUser;
+  room: string;
+}
+
+interface SocketUserWithRoomAndUserList {
+  user: SocketUser;
+  userlist: UserList;
+  room: string;
+}
+
+interface RoomMessages {
+  [key: string]: NewMessage[];
+}
+
+interface RoomUsers {
+  [key: string]: UserList;
+}
+
+interface NewMessage {
+  user: SocketUser;
+  created_at: string;
+  message: string;
+}
+
+let user: SocketUser;
+
+type UserList = SocketUser[];
+
+$(() => {
+  const socket = io();
+  const roomUsers: RoomUsers = {} as RoomUsers;
+  const roomMessages: RoomMessages = {} as RoomMessages;
+  let currentRoom: string;
+  $.post("/authenticated", (data) => {
+    if (data.auth) {
+      socket.emit("user authorized", { username: data.username });
+    }
+  });
 
   $(".channellistSidebarButton").on("click", () => {
     toggleNav();
   });
 
-  const socket = io();
-  const roomMessages: {} = {};
-  const roomUsers: {} = {};
-  let currentRoom: string = null;
-  interface User {
-    color: string;
-    username: string;
-  }
-
-  type Userlist = [User];
-
-  function addUsersToUserlist(data: Userlist): void {
-    $(".userlist").find("*").not(".userlist-count").remove();
-    data.sort((x, y) => (x.username < y.username ? 1 : -1));
-    data.forEach((user: User) => {
-      $(".userlist").append(
-        `<li class="nav-item user" style="color:${user.color}"><b>${user.username}</b></li>`,
-      );
-    });
-    $(".userlist-count").text(
-      `${data.length} ${data.length === 1 ? "User" : "Users"}`,
-    );
-  }
-
   $(document).on("click", ".channel", (e: Event): void => {
     $(".channellist").children().removeClass("active");
-    $(e.target).addClass("active");
-    const room = $(e.target).attr("room");
+    $(e.target as EventTarget).addClass("active");
+    const room: string = $(e.target as EventTarget).attr("room")!;
 
     $(".messagelist").empty();
     currentRoom = room;
-    if (roomMessages[room]) {
-      roomMessages[room].forEach((data) => {
+    if (roomMessages[currentRoom]) {
+      roomMessages[currentRoom].forEach((data: NewMessage) => {
         /* eslint-disable indent */
 
         $(".messagelist").append(
@@ -86,15 +128,26 @@ $(() => {
 
   $(".new-message").on("keyup", (e) => {
     if (e.keyCode === 13) {
-      const inputData = $(".new-message").val();
+      const inputData = $(".new-message").val() as string;
 
-      socket.emit("new message", { room: currentRoom, message: inputData });
+      const messageData: SocketUserMessage = {
+        room: currentRoom,
+        message: inputData,
+        user,
+      };
+      socket.emit("new message", messageData);
+
       $(".new-message").val("");
     }
   });
 
-  socket.on("new message", (data) => {
-    roomMessages[data.room].push({ message: data.message, user: data.user });
+  socket.on("new message", (data: SocketUserMessage) => {
+    const newMessageData: NewMessage = {
+      message: data.message,
+      user: data.user,
+      created_at: data.created_at!,
+    };
+    roomMessages[data.room].push(newMessageData);
     if (data.room === currentRoom) {
       $(".messagelist").append(
         `
@@ -116,39 +169,40 @@ ${data.message}
     }
   });
 
-  $.post("/authenticated", (data) => {
-    if (data.auth) {
-      socket.emit("user authorized", { username: data.username });
-    }
-  });
   /**
    * Set the current User's username and color
    */
-  socket.on("user authorized", (data) => {
+  socket.on("user authorized", (data: SocketUser) => {
+    user = data;
     $(".username").html(`${data.username}`);
     $(".username").css("color", data.color);
     $(".avatar").attr("src", data.gravatar);
   });
 
-  socket.on("you joined a room", (data) => {
+  socket.on("you joined a room", (data: SocketUserWithRoomAndUserList) => {
     $(".list-group-item.active").removeClass("active");
+
     $(".channellist").append(
       `<li class="list-group-item active channel" room="${data.room}">#${data.room}</li>`,
     );
+
     currentRoom = data.room;
-    roomMessages[data.room] = [];
+
+    roomMessages[data.room] = [] as NewMessage[];
+
     roomUsers[data.room] = data.userlist;
+
     $(".messagelist").empty();
-    return addUsersToUserlist(data.userlist);
+
+    addUsersToUserlist(data.userlist);
   });
 
-  socket.on("you left a room", (data) => {
+  socket.on("you left a room", (data: { room: string }) => {
     $(`.list-group-item[room="${data.room}"]`).remove();
   });
 
   // a new user has joined a room you are currently in
-
-  socket.on("a different user joined a room", (data) => {
+  socket.on("a different user joined a room", (data: SocketUserWithRoom) => {
     if (roomUsers[data.room] === undefined) {
       roomUsers[data.room] = [];
     }
@@ -160,9 +214,9 @@ ${data.message}
     }
   });
 
-  socket.on("a different user is disconnecting", (data) => {
+  socket.on("a different user is disconnecting", (data: SocketUserWithRoom) => {
     roomUsers[data.room] = roomUsers[data.room].filter(
-      (x) => x.username !== data.user.username,
+      (user: SocketUser) => user.username !== data.user.username,
     );
     addUsersToUserlist(roomUsers[data.room]);
   });

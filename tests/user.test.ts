@@ -1,18 +1,30 @@
-import { createConnection, QueryFailedError } from "typeorm";
+import { createConnection, QueryFailedError, Connection } from "typeorm";
 import { validate } from "class-validator";
+import passportGithub from "passport-github2";
 import { User, Channel, Message } from "../models";
 
 require("dotenv").config({ path: ".env.testing" });
 
+interface GithubProfile extends passportGithub.Profile {
+  emails: [
+    {
+      value: string;
+    },
+  ];
+  id: string;
+  username: string;
+  displayName: string;
+}
+
 describe("users", () => {
-  let connection;
-  const profileData = {
-    id: 1,
+  let connection: Connection;
+  const profileData: GithubProfile = {
+    id: "1",
     username: "githubTest1",
-    emails: [
-      { value: "test1@test.com", primary: true },
-      { value: "test2@test.com", primary: false },
-    ],
+    emails: [{ value: "test1@test.com" }],
+    displayName: "githubTest1",
+    profileUrl: "",
+    provider: "github",
   };
 
   beforeAll(async () => {
@@ -24,7 +36,7 @@ describe("users", () => {
   });
 
   beforeEach(async () => {
-    let user = new User();
+    const user: User = new User();
     user.username = "test";
     user.color = "test";
     user.email = "test@test.com";
@@ -38,7 +50,7 @@ describe("users", () => {
   });
 
   test("should prevent user from saving because same username", async () => {
-    let user = new User();
+    const user: User = new User();
     user.username = "test";
     user.color = "test";
     user.email = "test2@test.com";
@@ -46,7 +58,7 @@ describe("users", () => {
   });
 
   test("should prevent user from saving because password invalid", async () => {
-    let user = new User();
+    const user: User = new User();
     user.username = "test2";
     user.color = "test";
     user.email = "test2@test.com";
@@ -63,27 +75,27 @@ describe("users", () => {
   });
 
   test("should allow creation of a new user github oauth account", async () => {
-    await User.findOrCreateGithub(profileData, (user) => {
-      expect(user).toHaveProperty("githubId", 1);
+    await User.findOrCreateGithub(profileData, (user: User) => {
+      expect(user).toHaveProperty("githubId", "1");
       expect(user).toHaveProperty("username", "githubTest1");
     });
   });
 
   test("should save github oauth id to a previous user acccount", async () => {
-    let newUser = new User();
+    const newUser = new User();
     newUser.username = "githubTest2";
     newUser.color = "test";
     newUser.email = "test1@test.com";
     await newUser.save();
     await User.findOrCreateGithub(profileData, (user) => {
-      expect(user).toHaveProperty("githubId", 1);
+      expect(user).toHaveProperty("githubId", "1");
       expect(user).toHaveProperty("username", "githubTest2");
     });
   });
 
   test("should save user to the channel", async () => {
-    let channel = new Channel();
-    let user = await User.findOne({
+    let channel: Channel = new Channel();
+    const user: User = await User.findOneOrFail({
       where: { username: "test" },
       relations: ["channels"],
     });
@@ -91,7 +103,7 @@ describe("users", () => {
     await channel.save();
     user.channels.push(channel);
     await user.save();
-    channel = await Channel.findOne({
+    channel = await Channel.findOneOrFail({
       where: { name: "test" },
       relations: ["users"],
     });
@@ -100,7 +112,7 @@ describe("users", () => {
   });
 
   test("should prevent user from saving because email is invalid", async () => {
-    let user = new User();
+    const user = new User();
     user.username = "test2";
     user.color = "test";
     user.email = "test";

@@ -21,8 +21,6 @@ import Channel from "./Channel";
 interface GithubProfile extends passportGithub.Profile {
   emails: [
     {
-      primary?: boolean;
-      verified?: boolean;
       value: string;
     },
   ];
@@ -83,7 +81,7 @@ export default class User extends BaseEntity {
     profile: GithubProfile,
     next: (user: User) => void,
   ): Promise<void> {
-    const email = profile.emails.filter((email) => email.primary)[0].value;
+    const email = profile.emails[0].value;
     let user: User | undefined = await User.findOne({
       where: [{ email }, { githubId: profile.id }],
     });

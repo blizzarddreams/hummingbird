@@ -1,24 +1,10 @@
-import {
-  createConnection,
-  AfterUpdate,
-  useContainer,
-  QueryFailedError,
-} from "typeorm";
-import { validate } from "class-validator";
+import { createConnection, QueryFailedError, Connection } from "typeorm";
 import { User, Channel, Message } from "../models";
 
 require("dotenv").config({ path: ".env.testing" });
 
 describe("channels", () => {
-  let connection;
-  const profileData = {
-    id: 1,
-    username: "githubTest",
-    emails: [
-      { value: "test2@test.com", primary: false },
-      { value: "test4@test.com", primary: true },
-    ],
-  };
+  let connection: Connection;
 
   beforeAll(async () => {
     connection = await createConnection();
@@ -29,7 +15,7 @@ describe("channels", () => {
   });
 
   beforeEach(async () => {
-    let channel = new Channel();
+    const channel: Channel = new Channel();
     channel.name = "test";
     await channel.save();
   });
@@ -41,8 +27,8 @@ describe("channels", () => {
   });
 
   test("should not allow duplicate channel", async () => {
-    let newChannel = new Channel();
-    newChannel.name = "test";
-    await expect(newChannel.save()).rejects.toThrowError(QueryFailedError);
+    const channel: Channel = new Channel();
+    channel.name = "test";
+    await expect(channel.save()).rejects.toThrowError(QueryFailedError);
   });
 });

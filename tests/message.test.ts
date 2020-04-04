@@ -1,19 +1,11 @@
-import { createConnection, AfterUpdate, useContainer } from "typeorm";
+import { createConnection, Connection } from "typeorm";
 import { validate } from "class-validator";
 import { User, Channel, Message } from "../models";
 
 require("dotenv").config({ path: ".env.testing" });
 
 describe("messages", () => {
-  let connection;
-  const profileData = {
-    id: 1,
-    username: "githubTest",
-    emails: [
-      { value: "test2@test.com", primary: false },
-      { value: "test4@test.com", primary: true },
-    ],
-  };
+  let connection: Connection;
 
   beforeAll(async () => {
     connection = await createConnection();
@@ -24,7 +16,7 @@ describe("messages", () => {
   });
 
   beforeEach(async () => {
-    let user = new User();
+    const user = new User();
     user.username = "test";
     user.color = "test";
     user.email = "test@test.com";
@@ -38,7 +30,7 @@ describe("messages", () => {
   });
 
   test("should not save message because data is not valid", async () => {
-    let user = await User.findOne({ username: "test" });
+    const user: User = await User.findOneOrFail({ username: "test" });
     const message = new Message();
     message.data = "";
     message.user = user;

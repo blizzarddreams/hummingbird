@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
 } from "typeorm";
 import { MinLength, IsNotEmpty } from "class-validator";
+import { isNotEmptyString } from "../validators";
 
 import User from "./User";
 import Channel from "./Channel";
@@ -18,7 +19,8 @@ export default class Message extends BaseEntity {
 
   @Column()
   @MinLength(1)
-  @IsNotEmpty()
+  //@IsNotEmpty()
+  @isNotEmptyString()
   data!: string;
 
   @CreateDateColumn({ nullable: true })

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "lib": ["DOM"],
     "target": "es6",
-    "module": "commonjs",
+    "module": "esnext",
     "moduleResolution": "node",
     "outDir": "./build",
     "emitDecoratorMetadata": true,

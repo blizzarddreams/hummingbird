@@ -2,15 +2,17 @@
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const TerserWebpackPlugin = require("terser-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
+  .BundleAnalyzerPlugin;
 const path = require("path");
 const webpack = require("webpack");
 
 module.exports = {
   entry: [
     path.join(__dirname, "static/app.scss"),
-    path.join(__dirname, "static/app.ts"),
+    path.join(__dirname, "static/App.tsx"),
   ],
-
+  mode: "production",
   devtool: "",
   plugins: [
     new MiniCssExtractPlugin({
@@ -18,12 +20,14 @@ module.exports = {
     }),
     // @ts-ignore
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+    new BundleAnalyzerPlugin(),
   ],
   resolve: {
-    extensions: [".js", ".ts"],
+    extensions: [".ts", ".tsx", ".js", ".json"],
   },
   optimization: {
     minimize: true,
+    usedExports: true,
     minimizer: [new TerserWebpackPlugin(), new OptimizeCSSAssetsPlugin()],
   },
 
@@ -31,7 +35,14 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              configFile: "tsconfig.webpack.json",
+            },
+          },
+        ],
         exclude: /node-modules/,
       },
       {

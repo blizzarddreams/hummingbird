@@ -13,6 +13,7 @@ import passportGoogle from "passport-google-oauth20";
 import passportGithub from "passport-github2";
 
 import { MinLength, IsEmail, IsOptional, IsString } from "class-validator";
+import { IsNotEmptyString } from "../validators";
 
 import randomcolor from "randomcolor";
 import Message from "./Message";
@@ -42,12 +43,14 @@ export default class User extends BaseEntity {
 
   @Column({ unique: true })
   @MinLength(1)
+  @IsNotEmptyString()
   username!: string;
 
   @Column({ nullable: true })
   @MinLength(8)
   @IsString()
   @IsOptional()
+  //@IsNotEmptyString()
   password!: string;
 
   @Column({ nullable: true, unique: true })
@@ -62,6 +65,9 @@ export default class User extends BaseEntity {
 
   @Column()
   color!: string;
+
+  @Column({ nullable: true })
+  status!: string;
 
   @CreateDateColumn({ nullable: true })
   createdAt!: Date;

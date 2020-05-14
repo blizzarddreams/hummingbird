@@ -4,7 +4,7 @@ import {
   ValidationArguments,
 } from "class-validator";
 
-export const isNotEmptyString = (
+export const IsNotEmptyString = (
   // property: string,
   validationOptions?: ValidationOptions,
 ) => {
@@ -17,8 +17,6 @@ export const isNotEmptyString = (
       options: { message: "Text must not be blank." } as ValidationOptions,
       validator: {
         validate(value: string, args: ValidationArguments): boolean {
-          // const [relatedPropertyName] = args.constraints;
-          //const relatedValue = (args.object as any)[relatedPropertyName];
           return value.trim().length > 0;
         },
       },

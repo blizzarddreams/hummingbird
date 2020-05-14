@@ -1,19 +1,34 @@
 import sanitizehtml from "sanitize-html";
 import { Server, Socket } from "socket.io";
-import crypto from "crypto";
 import { validate } from "class-validator";
 import { User, Channel, Message } from "./models";
 
 interface SocketUser {
   username: string;
   color: string;
-  gravatar: string;
+  email: string;
 }
+
+interface SocketMessage {
+  user: SocketUser;
+  message: string;
+  timestamp: Date;
+  room: string;
+}
+
+interface SocketRoom {
+  room: string;
+  userlist: SocketUserList;
+  messages: SocketMessages;
+}
+
+type SocketUserList = SocketUser[];
+type SocketMessages = SocketMessage[];
 
 interface SocketUserMessage {
   room: string;
   message: string;
-  user: SocketUser;
+  user?: SocketUser;
 }
 
 interface SocketUserWithRoom {
@@ -36,22 +51,16 @@ interface UserServer extends Server {
   username?: string;
 }
 export default (io: UserServer): void => {
-  async function userData(username: string): Promise<SocketUser> {
+  const userData = async (username: string): Promise<SocketUser> => {
     const user: User = await User.findOneOrFail({ username });
-
-    const hash: string = crypto
-      .createHash("md5")
-      .update(user.email)
-      .digest("hex");
-    const gravatar = `https://www.gravatar.com/avatar/${hash}/`;
     return {
       username: user.username,
       color: user.color,
-      gravatar,
+      email: user.email,
     };
-  }
+  };
 
-  async function userList(room: string): Promise<UserList> {
+  const userList = async (room: string): Promise<SocketUserList> => {
     return new Promise((resolve) => {
       io.in(room).clients(async (err: Error, clients: string[]) => {
         const userListData: Promise<UserList> = Promise.all(
@@ -66,19 +75,23 @@ export default (io: UserServer): void => {
         resolve(userListData);
       });
     });
-  }
+  };
 
   interface Websocket extends Socket {
     username: string;
+    userId: number;
   }
 
   io.on("connection", async (socket: Websocket) => {
-    socket.on("user authorized", async (data: { username: string }) => {
-      socket.username = data.username;
-      const user: User = await User.findOneOrFail({
-        where: { username: socket.username },
+    socket.on("authenticate", async (id: string) => {
+      const user: User | undefined = await User.findOne({
+        where: { id },
         relations: ["channels"],
       });
+
+      if (!user) return false;
+      socket.userId = user.id;
+      socket.username = user.username;
 
       socket.join("lobby");
       const lobby: Channel = await Channel.findOrCreate("lobby");
@@ -91,41 +104,36 @@ export default (io: UserServer): void => {
       user.channels.forEach(async (channel: Channel) => {
         socket.join(channel.name);
 
-        const differentUserData: SocketUserWithRoom = {
+        const data = {
+          room: channel.name,
           user: await userData(socket.username),
-          room: channel.name,
         };
-        socket
-          .to(channel.name)
-          .emit("a different user joined a room", differentUserData);
+        socket.to(channel.name).emit("a different user joined a room", data);
 
-        const userlist: UserList = await userList(channel.name);
+        const userlist: SocketUserList = await userList(channel.name);
 
-        const currentUserData: SocketUserWithRoomAndUserList = {
-          user: await userData(user.username),
-          room: channel.name,
-          userlist,
-        };
-        socket.emit("you joined a room", currentUserData);
+        socket.emit("you joined a room", { room: channel.name, userlist });
       });
       socket.emit("user authorized", await userData(socket.username));
     });
 
     socket.on("new message", async (data: SocketUserMessage) => {
-      let messageData: string | string[] = sanitizehtml(data.message, {
+      data.message = sanitizehtml(data.message, {
         allowedTags: [],
       });
       const validatePost = new Message();
-      validatePost.data = (messageData as string).trim();
+      validatePost.data = data.message.trim();
       const errors = await validate(validatePost);
       if (errors.length > 0) {
         return false;
       }
       const roomName: string = data.room;
 
-      if ((messageData as string).startsWith("/")) {
-        messageData = (messageData as string).slice(1).split(" ");
-        const [command, channelName] = messageData;
+      if (data.message.startsWith("/")) {
+        const messageData = data.message.slice(1).split(" ");
+        const command = messageData[0];
+        const channelName = messageData[1].trim();
+        if (channelName.length === 0) return false;
         switch (command) {
           case "join": {
             const user = await User.findOneOrFail({
@@ -137,16 +145,15 @@ export default (io: UserServer): void => {
               user.channels.push(channel);
               socket.join(channel.name);
               const userlist = await userList(channel.name);
-              const currentUserData: SocketUserWithRoomAndUserList = {
-                user: await userData(user.username),
+
+              socket.emit("you joined a room", {
                 room: channel.name,
                 userlist,
-              };
-              socket.emit("you joined a room", currentUserData);
+              });
 
               socket.to(channelName).emit("a different user joined a room", {
                 user: await userData(socket.username),
-                room: channelName,
+                room: channel.name,
               });
             }
             break;
@@ -176,19 +183,21 @@ export default (io: UserServer): void => {
           where: { username: socket.username },
           relations: ["channels"],
         });
-        const newMessage: Message = new Message();
+        const message: Message = new Message();
 
-        newMessage.data = messageData as string;
-        newMessage.user = user;
-        await newMessage.save();
+        message.data = data.message;
+        message.user = user;
+        await message.save();
         await user.save();
 
-        io.to(roomName).emit("new message", {
-          room: roomName,
-          createdAt: newMessage.createdAt,
-          message: messageData,
+        const socketMessage: SocketMessage = {
           user: await userData(socket.username),
-        });
+          message: message.data,
+          timestamp: message.createdAt,
+          room: roomName,
+        };
+
+        io.in(roomName).emit("new message", socketMessage);
       }
     });
 
@@ -202,24 +211,13 @@ export default (io: UserServer): void => {
 
     socket.on("disconnecting", async () => {
       if (socket.username) {
-        const disconnectingUser: User = await User.findOneOrFail({
-          where: { username: socket.username },
-          relations: ["channels"],
-        });
-        const disconnectingUserData: SocketUser = await userData(
-          disconnectingUser.username,
-        );
-        const roomsUserWasIn: string[] = disconnectingUser.channels.map(
-          (x) => x.name,
-        );
-        roomsUserWasIn.forEach(async (roomName: string) => {
-          const userDisconnectingData: SocketUserWithRoom = {
-            user: disconnectingUserData,
-            room: roomName,
-          };
-          socket
-            .to(roomName)
-            .emit("a different user is disconnecting", userDisconnectingData);
+        const rooms: string[] = Object.keys(socket.rooms).slice(1); // we don't want the first room.
+        const disconnectingUser = await userData(socket.username);
+        rooms.forEach((room) => {
+          socket.in(room).emit("a different user is disconnecting", {
+            user: disconnectingUser,
+            room,
+          });
         });
       }
     });

@@ -24,8 +24,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-const Welcome = ({ darkTheme }: { darkTheme: boolean }): JSX.Element => {
-  const classes = useStyles({ darkTheme });
+const Welcome = (): JSX.Element => {
+  const classes = useStyles();
 
   return (
     <Box textAlign="center">

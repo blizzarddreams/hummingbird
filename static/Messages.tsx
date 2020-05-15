@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useContext } from "react";
 import {
   Typography,
   Box,
@@ -9,10 +9,10 @@ import {
 import Gravatar from "./Gravatar";
 import Moment from "./Moment";
 import UserTooltip from "./UserTooltip";
+// import DarkModeContext from "./DarkMode";
 interface MessagesProps {
   data: ChatData;
   value: any;
-  darkTheme: boolean;
 }
 
 interface TabPanelProps {
@@ -75,7 +75,8 @@ const TabPanel = (props: TabPanelProps): JSX.Element => {
     </Typography>
   );
 };
-const Messages = ({ data, value, darkTheme }: MessagesProps): JSX.Element => {
+const Messages = ({ data, value }: MessagesProps): JSX.Element => {
+  // const darkMode = useContext(DarkModeContext);
   const messageRef = useRef<HTMLDivElement>(null);
   const classes = useStyles();
 
@@ -126,10 +127,7 @@ const Messages = ({ data, value, darkTheme }: MessagesProps): JSX.Element => {
                             placement="left-start"
                             interactive={true}
                             title={
-                              <UserTooltip
-                                darkTheme={darkTheme}
-                                username={message.user.username}
-                              />
+                              <UserTooltip username={message.user.username} />
                             }
                           >
                             <Box

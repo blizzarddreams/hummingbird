@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   makeStyles,
   Theme,
@@ -10,23 +10,25 @@ import {
   darken,
   Button,
 } from "@material-ui/core";
+import DarkModeContext from "./DarkMode";
 
+interface StyleProps {
+  darkMode: boolean;
+}
 const useStyles = makeStyles((theme: Theme) => ({
-  card: (props: { darkTheme: boolean }) => ({
-    color: props.darkTheme ? "#dff7eb" : "#0a0e0c",
-    backgroundColor: props.darkTheme ? "#dff7eb" : "#0a0e0c",
+  card: (props: StyleProps) => ({
+    color: props.darkMode ? "#dff7eb" : "#0a0e0c",
+    backgroundColor: props.darkMode ? "#dff7eb" : "#0a0e0c",
   }),
 
   input: {
     margin: theme.spacing(1),
     //width: "40%",
     "& .MuiFormLabel-root": {
-      color: (props: { darkTheme: boolean }): string =>
-        props.darkTheme ? "#222" : "#eee",
+      color: (props: StyleProps): string => (props.darkMode ? "#222" : "#eee"),
     },
     "& .MuiOutlinedInput-root": {
-      color: (props: { darkTheme: boolean }): string =>
-        props.darkTheme ? "#222" : "#eee",
+      color: (props: StyleProps): string => (props.darkMode ? "#222" : "#eee"),
       backgroundColor: fade("#66d0f9", 0.1),
       borderRadius: theme.shape.borderRadius,
 
@@ -50,12 +52,10 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-const SettingsTooltip = ({
-  darkTheme,
-}: {
-  darkTheme: boolean;
-}): JSX.Element => {
+const SettingsTooltip = (): JSX.Element => {
+  const darkMode = useContext(DarkModeContext);
   const [status, setStatus] = useState("");
+  const classes = useStyles({ darkMode });
 
   useEffect(() => {
     fetch("/user/status/default")
@@ -85,7 +85,6 @@ const SettingsTooltip = ({
         if (data.success) setStatus(data.status);
       });
   };
-  const classes = useStyles({ darkTheme });
   return (
     <Card classes={{ root: classes.card }}>
       <CardContent style={{ width: "100%" }}>

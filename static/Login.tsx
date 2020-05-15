@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   TextField,
   makeStyles,
@@ -13,6 +13,11 @@ import { useHistory } from "react-router-dom";
 import { GitHub as GitHubIcon } from "@material-ui/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+import DarkModeContext from "./DarkMode";
+
+interface StyleProps {
+  darkMode: boolean;
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
   grid: {
@@ -48,12 +53,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     margin: theme.spacing(1),
     width: "40%",
     "& .MuiFormLabel-root": {
-      color: (props: { darkTheme: boolean }): string =>
-        props.darkTheme ? "#eee" : "#222",
+      color: (props: StyleProps): string => (props.darkMode ? "#eee" : "#222"),
     },
     "& .MuiOutlinedInput-root": {
-      color: (props: { darkTheme: boolean }): string =>
-        props.darkTheme ? "#eee" : "#222",
+      color: (props: StyleProps): string => (props.darkMode ? "#eee" : "#222"),
       backgroundColor: fade("#66d0f9", 0.1),
       borderRadius: theme.shape.borderRadius,
 
@@ -69,14 +72,16 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
   },
 }));
-const Login = ({ darkTheme }: { darkTheme: boolean }): JSX.Element => {
+
+const Login = (): JSX.Element => {
+  const darkMode = useContext(DarkModeContext);
   const [data, setData] = useState({
     username: "",
     password: "",
   });
   const [error, setError] = useState("");
   const history = useHistory();
-  const classes = useStyles({ darkTheme });
+  const classes = useStyles({ darkMode });
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const name = e.target.getAttribute("name")!;

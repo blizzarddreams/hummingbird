@@ -1,10 +1,11 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useContext } from "react";
 import { Grid, TextField, makeStyles } from "@material-ui/core";
 import UserList from "./UserList";
 import Messages from "./Messages";
 import { Theme, fade } from "@material-ui/core/styles";
 import io from "socket.io-client";
 import ChannelList from "./ChannelList";
+import DarkModeContext from "./DarkMode";
 
 const socketio = io();
 
@@ -20,7 +21,6 @@ interface SocketMessage {
   timestamp: Date;
   room: string;
 }
-
 interface SocketRoom {
   room: string;
   userlist: SocketUserList;
@@ -50,6 +50,10 @@ interface ADifferentUserJoinedARoom {
   user: SocketUser;
 }
 
+interface StyleProps {
+  darkMode: boolean;
+}
+
 type ADifferentUserIsDisconnecting = ADifferentUserJoinedARoom;
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -68,12 +72,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     //margin: theme.spacing(2),
     height: "20% !important",
     "& .MuiFormLabel-root": {
-      color: (props: { darkTheme: boolean }): string =>
-        props.darkTheme ? "#eee" : "#222",
+      color: (props: StyleProps): string => (props.darkMode ? "#eee" : "#222"),
     },
     "& .MuiOutlinedInput-root": {
-      color: (props: { darkTheme: boolean }): string =>
-        props.darkTheme ? "#eee" : "#222",
+      color: (props: StyleProps): string => (props.darkMode ? "#eee" : "#222"),
       backgroundColor: fade("#66d0f9", 0.1),
       borderRadius: "0",
 
@@ -86,8 +88,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
   },
 }));
-const Chat = ({ darkTheme }: { darkTheme: boolean }): JSX.Element => {
-  const classes = useStyles({ darkTheme });
+const Chat = (): JSX.Element => {
+  const darkMode = useContext(DarkModeContext);
+  const classes = useStyles({ darkMode });
   const { current: socket } = useRef(socketio);
   const [value, setValue] = useState(0);
   const [channels, setChannels] = useState<ChatData>({} as ChatData);
@@ -200,10 +203,10 @@ const Chat = ({ darkTheme }: { darkTheme: boolean }): JSX.Element => {
         />
       </Grid>
       <Grid item xs={8} className={classes.chatBoxColumn}>
-        <Messages data={channels} value={value} darkTheme={darkTheme} />
+        <Messages data={channels} value={value} />
       </Grid>
       <Grid item xs={2} className={classes.chatBoxColumn}>
-        <UserList data={channels} value={value} darkTheme={darkTheme} />
+        <UserList data={channels} value={value} />
       </Grid>
       <Grid item xs={12} className={classes.newMessageColumn}>
         <form onSubmit={handleNewMessageSubmit}>

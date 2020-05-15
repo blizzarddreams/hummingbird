@@ -14,7 +14,6 @@ import UserTooltip from "./UserTooltip";
 interface UserListProps {
   data: ChatData;
   value: number;
-  darkTheme: boolean;
 }
 
 interface SocketUser {
@@ -47,7 +46,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     margin: theme.spacing(1),
   },
 }));
-const UserList = ({ data, value, darkTheme }: UserListProps): JSX.Element => {
+
+const UserList = ({ data, value }: UserListProps): JSX.Element => {
   const room = Object.keys(data)[value];
   const classes = useStyles();
   const [open, setOpen] = useState(false);
@@ -78,12 +78,7 @@ const UserList = ({ data, value, darkTheme }: UserListProps): JSX.Element => {
                     disableTouchListener
                     placement="left-start"
                     interactive={true}
-                    title={
-                      <UserTooltip
-                        darkTheme={darkTheme}
-                        username={user.username}
-                      />
-                    }
+                    title={<UserTooltip username={user.username} />}
                   >
                     <Box
                       display="flex"

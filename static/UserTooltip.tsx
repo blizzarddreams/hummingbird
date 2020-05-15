@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   makeStyles,
   Theme,
@@ -12,15 +12,24 @@ import {
 import Gravatar from "./Gravatar";
 import Moment from "./Moment";
 import { CalendarToday as CalendarIcon } from "@material-ui/icons";
+import DarkModeContext from "./DarkMode";
+
+interface StyleProps {
+  darkMode: boolean;
+}
+
+interface UserTooltipProps {
+  username: string;
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
-  card: (props: { darkTheme: boolean }) => ({
-    color: props.darkTheme ? "#dff7eb" : "#0a0e0c",
-    backgroundColor: props.darkTheme ? "#dff7eb" : "#0a0e0c",
+  card: (props: StyleProps) => ({
+    color: props.darkMode ? "#dff7eb" : "#0a0e0c",
+    backgroundColor: props.darkMode ? "#dff7eb" : "#0a0e0c",
   }),
 
-  box: (props: { darkTheme: boolean }) => ({
-    color: `${props.darkTheme ? "#0a0e0c" : "#dff7eb"}!important`,
+  box: (props: StyleProps) => ({
+    color: `${props.darkMode ? "#0a0e0c" : "#dff7eb"}!important`,
     //backgroundColor: props.darkTheme ? "#dff7eb" : "#0a0e0c",
   }),
 
@@ -28,12 +37,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     margin: theme.spacing(1),
     //width: "40%",
     "& .MuiFormLabel-root": {
-      color: (props: { darkTheme: boolean }): string =>
-        props.darkTheme ? "#222" : "#eee",
+      color: (props: StyleProps): string => (props.darkMode ? "#222" : "#eee"),
     },
     "& .MuiOutlinedInput-root": {
-      color: (props: { darkTheme: boolean }): string =>
-        props.darkTheme ? "#222" : "#eee",
+      color: (props: StyleProps): string => (props.darkMode ? "#222" : "#eee"),
       backgroundColor: fade("#66d0f9", 0.1),
       borderRadius: theme.shape.borderRadius,
 
@@ -57,13 +64,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-const UserTooltip = ({
-  darkTheme,
-  username,
-}: {
-  darkTheme: boolean;
-  username: string;
-}): JSX.Element => {
+const UserTooltip = ({ username }: UserTooltipProps): JSX.Element => {
+  const darkMode = useContext(DarkModeContext);
+  const classes = useStyles({ darkMode });
   const [user, setUser] = useState({
     username: "",
     email: "",
@@ -82,7 +85,6 @@ const UserTooltip = ({
       });
   }, []);
 
-  const classes = useStyles({ darkTheme });
   return (
     <Card classes={{ root: classes.card }}>
       <CardContent>

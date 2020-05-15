@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import {
   IconButton,
@@ -19,18 +19,22 @@ import {
 
 import Gravatar from "./Gravatar";
 import SettingsTooltip from "./SettingsTooltip";
+import DarkModeContext from "./DarkMode";
 
+interface StyleProps {
+  darkMode: boolean;
+}
 const useStyles = makeStyles(() => ({
-  navBar: (props: { darkTheme: boolean }) => ({
-    backgroundColor: props.darkTheme ? "#0a0e0c" : "#dff7eb",
+  navBar: (props: StyleProps) => ({
+    backgroundColor: props.darkMode ? "#0a0e0c" : "#dff7eb",
     boxShadow: "0",
   }),
   navBarRoot: {
     boxShadow: "none",
     height: "10%!important",
   },
-  icons: (props: { darkTheme: boolean }) => ({
-    color: props.darkTheme ? "#dff7eb" : "#0a0e0c",
+  icons: (props: StyleProps) => ({
+    color: props.darkMode ? "#dff7eb" : "#0a0e0c",
   }),
   toolBar: {
     display: "flex",
@@ -47,10 +51,11 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const Navbar = ({ darkTheme }: { darkTheme: boolean }): JSX.Element => {
+const Navbar = (): JSX.Element => {
+  const darkMode = useContext(DarkModeContext);
   const history = useHistory();
   const location = useLocation();
-  const classes = useStyles({ darkTheme });
+  const classes = useStyles({ darkMode });
   //const [email, setEmail] = useState(Cookies.get());
   const [open, setOpen] = useState(false);
 
@@ -87,7 +92,7 @@ const Navbar = ({ darkTheme }: { darkTheme: boolean }): JSX.Element => {
               <ClickAwayListener onClickAway={handleTooltipClose}>
                 <Tooltip
                   classes={{ tooltip: classes.tooltip }}
-                  title={<SettingsTooltip darkTheme={darkTheme} />}
+                  title={<SettingsTooltip />}
                   interactive={true}
                   open={open}
                   onClose={handleTooltipClose}

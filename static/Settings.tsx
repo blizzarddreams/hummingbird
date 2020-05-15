@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Box,
   TextField,
@@ -9,6 +9,7 @@ import {
   makeStyles,
 } from "@material-ui/core";
 import { Theme, fade, darken } from "@material-ui/core/styles";
+import DarkModeContext from "./DarkMode";
 
 interface SettingsData {
   username: string;
@@ -28,9 +29,13 @@ interface TabPanelProps {
   index: any;
   value: any;
 }
+
+interface StyleProps {
+  darkMode: boolean;
+}
 const useStyles = makeStyles((theme: Theme) => ({
-  navBar: (props: { darkTheme: boolean }) => ({
-    backgroundColor: props.darkTheme ? "#0a0e0c" : "#dff7eb",
+  navBar: (props: StyleProps) => ({
+    backgroundColor: props.darkMode ? "#0a0e0c" : "#dff7eb",
     boxShadow: "0",
   }),
   navBarRoot: {
@@ -40,8 +45,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     width: "24rem",
     minWidth: "24rem",
   },
-  settingsIcon: (props: { darkTheme: boolean }) => ({
-    color: props.darkTheme ? "#dff7eb" : "#0a0e0c",
+  settingsIcon: (props: StyleProps) => ({
+    color: props.darkMode ? "#dff7eb" : "#0a0e0c",
   }),
   toolBar: {
     display: "flex",
@@ -67,12 +72,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     margin: theme.spacing(1),
 
     "& .MuiFormLabel-root": {
-      color: (props: { darkTheme: boolean }): string =>
-        props.darkTheme ? "#eee" : "#222",
+      color: (props: StyleProps): string => (props.darkMode ? "#eee" : "#222"),
     },
     "& .MuiOutlinedInput-root": {
-      color: (props: { darkTheme: boolean }): string =>
-        props.darkTheme ? "#eee" : "#222",
+      color: (props: StyleProps): string => (props.darkMode ? "#eee" : "#222"),
       backgroundColor: fade("#66d0f9", 0.1),
       borderRadius: theme.shape.borderRadius,
 
@@ -113,8 +116,9 @@ const TabPanel = (props: TabPanelProps): JSX.Element => {
   );
 };
 
-const Settings = ({ darkTheme }: { darkTheme: boolean }): JSX.Element => {
-  const classes = useStyles({ darkTheme });
+const Settings = (): JSX.Element => {
+  const darkMode = useContext(DarkModeContext);
+  const classes = useStyles({ darkMode });
   const [value, setValue] = useState(0);
   const [settings, setSettings] = useState<SettingsData>({
     username: "",

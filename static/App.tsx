@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter, Switch } from "react-router-dom";
 import Chat from "./Chat";
@@ -15,15 +15,16 @@ import Welcome from "./Welcome";
 import Register from "./Register";
 import PrivateRoute from "./PrivateRoute";
 import GuestRoute from "./GuestRoute";
+import DarkModeContext from "./DarkMode";
 
-interface AppProps {
-  darkTheme: boolean;
+interface StyleProps {
+  darkMode: boolean;
 }
 
 const useStyles = makeStyles(() => ({
-  container: (props: AppProps) => ({
-    backgroundColor: props.darkTheme ? "#0a0e0c" : "#dff7eb",
-    color: props.darkTheme ? "#dff7eb" : "#0a0e0c",
+  container: (props: StyleProps) => ({
+    backgroundColor: props.darkMode ? "#0a0e0c" : "#dff7eb",
+    color: props.darkMode ? "#dff7eb" : "#0a0e0c",
     height: "100% !important",
   }),
   moon: {
@@ -40,57 +41,53 @@ const useStyles = makeStyles(() => ({
 }));
 
 const App = (): JSX.Element => {
-  const [darkTheme, setDarkTheme] = useState(
-    Cookies.get("darkTheme") === "true" ? true : false,
+  const [darkMode, setDarkMode] = useState(
+    Cookies.get("darkMode") === "true" ? true : false,
   );
 
-  const [, setAuth] = useState(""); //Cookies.get("email"));
-
-  useEffect(() => {
-    setAuth(Cookies.get("email") || "");
-  }, []);
-
-  const toggleDarkTheme = (): void => {
-    const darkThemeCurrentValue = Cookies.get("darkTheme");
+  const toggleDarkMode = (): void => {
+    const darkThemeCurrentValue = Cookies.get("darkMode");
     Cookies.set(
-      "darkTheme",
+      "darkMode",
       darkThemeCurrentValue === "true" ? "false" : "true",
     );
-    setDarkTheme(!darkTheme);
+    setDarkMode(!darkMode);
   };
 
-  const classes = useStyles({ darkTheme });
+  const classes = useStyles({ darkMode });
   return (
     <Box className={classes.container}>
-      <BrowserRouter>
-        <Navbar darkTheme={darkTheme} />
-        <Container>
-          <Switch>
-            <PrivateRoute path="/app">
-              <Chat darkTheme={darkTheme} />
-            </PrivateRoute>
-            <GuestRoute path="/login">
-              <Login darkTheme={darkTheme} />
-            </GuestRoute>
-            <PrivateRoute path="/settings">
-              <Settings darkTheme={darkTheme} />
-            </PrivateRoute>
-            <GuestRoute path="/register">
-              <Register darkTheme={darkTheme} />
-            </GuestRoute>
-            <GuestRoute path="/">
-              <Welcome darkTheme={darkTheme} />
-            </GuestRoute>
-          </Switch>
-        </Container>
-        <IconButton onClick={toggleDarkTheme} className={classes.button}>
-          {darkTheme ? (
-            <MoonIcon className={classes.moon} />
-          ) : (
-            <SunIcon className={classes.sun} />
-          )}
-        </IconButton>
-      </BrowserRouter>
+      <DarkModeContext.Provider value={darkMode}>
+        <BrowserRouter>
+          <Navbar />
+          <Container>
+            <Switch>
+              <PrivateRoute path="/app">
+                <Chat />
+              </PrivateRoute>
+              <GuestRoute path="/login">
+                <Login />
+              </GuestRoute>
+              <PrivateRoute path="/settings">
+                <Settings />
+              </PrivateRoute>
+              <GuestRoute path="/register">
+                <Register />
+              </GuestRoute>
+              <GuestRoute path="/">
+                <Welcome />
+              </GuestRoute>
+            </Switch>
+          </Container>
+          <IconButton onClick={toggleDarkMode} className={classes.button}>
+            {darkMode ? (
+              <MoonIcon className={classes.moon} />
+            ) : (
+              <SunIcon className={classes.sun} />
+            )}
+          </IconButton>
+        </BrowserRouter>
+      </DarkModeContext.Provider>
     </Box>
   );
 };

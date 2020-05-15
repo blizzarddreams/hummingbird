@@ -78,25 +78,23 @@ const App = (): JSX.Element => {
       <DarkModeContext.Provider value={darkMode}>
         <BrowserRouter>
           <Navbar />
-          <Container>
-            <Switch>
-              <PrivateRoute path="/app">
-                <Chat />
-              </PrivateRoute>
-              <GuestRoute path="/login">
-                <Login />
-              </GuestRoute>
-              <PrivateRoute path="/settings">
-                <Settings />
-              </PrivateRoute>
-              <GuestRoute path="/register">
-                <Register />
-              </GuestRoute>
-              <GuestRoute path="/">
-                <Welcome />
-              </GuestRoute>
-            </Switch>
-          </Container>
+          <Switch>
+            <PrivateRoute path="/app">
+              <Chat />
+            </PrivateRoute>
+            <GuestRoute path="/login">
+              <Login />
+            </GuestRoute>
+            <PrivateRoute path="/settings">
+              <Settings />
+            </PrivateRoute>
+            <GuestRoute path="/register">
+              <Register />
+            </GuestRoute>
+            <GuestRoute path="/">
+              <Welcome />
+            </GuestRoute>
+          </Switch>
         </BrowserRouter>
       </DarkModeContext.Provider>
       <Fab className={classes.darkModeButton} onClick={toggleDarkMode}>

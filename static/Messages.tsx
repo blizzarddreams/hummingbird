@@ -53,6 +53,7 @@ const useStyles = makeStyles(() => ({
   message: {
     display: "flex",
     flexDirection: "row",
+    alignItems: "center",
   },
   tooltip: {
     padding: "0",

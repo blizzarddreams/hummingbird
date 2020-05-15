@@ -53,6 +53,5 @@ app.get("*", (req, res) => {
 const io: UserServer = socketio(server);
 websocket(io);
 
-server.listen(process.env.PORT || 8000, () =>
-  console.log(`Listening on port ${process.env.PORT || 8000}`),
-);
+const port = process.env.PORT || 8000;
+server.listen(port, () => console.log(`Listening on port ${port}`));

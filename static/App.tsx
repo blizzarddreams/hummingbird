@@ -4,7 +4,7 @@ import ReactDOM from "react-dom";
 import { BrowserRouter, Switch } from "react-router-dom";
 import Chat from "./Chat";
 import Login from "./Login";
-import { makeStyles, Box, IconButton } from "@material-ui/core";
+import { makeStyles, Box, IconButton, Container } from "@material-ui/core";
 import {
   Brightness2 as MoonIcon,
   Brightness5 as SunIcon,
@@ -64,23 +64,25 @@ const App = (): JSX.Element => {
     <Box className={classes.container}>
       <BrowserRouter>
         <Navbar darkTheme={darkTheme} />
-        <Switch>
-          <PrivateRoute path="/app">
-            <Chat darkTheme={darkTheme} />
-          </PrivateRoute>
-          <GuestRoute path="/login">
-            <Login darkTheme={darkTheme} />
-          </GuestRoute>
-          <PrivateRoute path="/settings">
-            <Settings darkTheme={darkTheme} />
-          </PrivateRoute>
-          <GuestRoute path="/register">
-            <Register darkTheme={darkTheme} />
-          </GuestRoute>
-          <GuestRoute path="/">
-            <Welcome darkTheme={darkTheme} />
-          </GuestRoute>
-        </Switch>
+        <Container>
+          <Switch>
+            <PrivateRoute path="/app">
+              <Chat darkTheme={darkTheme} />
+            </PrivateRoute>
+            <GuestRoute path="/login">
+              <Login darkTheme={darkTheme} />
+            </GuestRoute>
+            <PrivateRoute path="/settings">
+              <Settings darkTheme={darkTheme} />
+            </PrivateRoute>
+            <GuestRoute path="/register">
+              <Register darkTheme={darkTheme} />
+            </GuestRoute>
+            <GuestRoute path="/">
+              <Welcome darkTheme={darkTheme} />
+            </GuestRoute>
+          </Switch>
+        </Container>
         <IconButton onClick={toggleDarkTheme} className={classes.button}>
           {darkTheme ? (
             <MoonIcon className={classes.moon} />

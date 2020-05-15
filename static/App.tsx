@@ -4,7 +4,14 @@ import ReactDOM from "react-dom";
 import { BrowserRouter, Switch } from "react-router-dom";
 import Chat from "./Chat";
 import Login from "./Login";
-import { makeStyles, Box, IconButton, Container } from "@material-ui/core";
+import {
+  makeStyles,
+  Box,
+  IconButton,
+  Container,
+  Fab,
+  darken,
+} from "@material-ui/core";
 import {
   Brightness2 as MoonIcon,
   Brightness5 as SunIcon,
@@ -38,6 +45,17 @@ const useStyles = makeStyles(() => ({
     bottom: "4rem",
     right: 0,
   },
+  darkModeButton: (props: StyleProps) => ({
+    backgroundColor: props.darkMode ? "#dff0f7" : "#080b17",
+    position: "fixed",
+    right: 0,
+    bottom: "4rem !important",
+    margin: "2rem !important",
+    color: props.darkMode ? "#080b17" : "#dff0f7",
+    "&:hover": {
+      backgroundColor: darken(props.darkMode ? "#dff0f7" : "#080b17", 0.1),
+    },
+  }),
 }));
 
 const App = (): JSX.Element => {
@@ -79,15 +97,11 @@ const App = (): JSX.Element => {
               </GuestRoute>
             </Switch>
           </Container>
-          <IconButton onClick={toggleDarkMode} className={classes.button}>
-            {darkMode ? (
-              <MoonIcon className={classes.moon} />
-            ) : (
-              <SunIcon className={classes.sun} />
-            )}
-          </IconButton>
         </BrowserRouter>
       </DarkModeContext.Provider>
+      <Fab className={classes.darkModeButton} onClick={toggleDarkMode}>
+        {darkMode ? <MoonIcon /> : <SunIcon />}
+      </Fab>
     </Box>
   );
 };

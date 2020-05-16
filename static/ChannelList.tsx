@@ -1,9 +1,11 @@
 import React from "react";
-import { Tabs, Tab, makeStyles } from "@material-ui/core";
+import { Tabs, Tab, makeStyles, IconButton, Box } from "@material-ui/core";
+import { Close as CloseIcon } from "@material-ui/icons";
 interface UserListProps {
   data: ChatData;
   value: number;
   handleTabChange: (e: React.ChangeEvent<{}>, newValue: number) => void;
+  handleChannelLeave: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 interface SocketUser {
   username: string;
@@ -41,6 +43,9 @@ const useStyles = makeStyles(() => ({
   indicator: {
     backgroundColor: "#23f0c7",
   },
+  closeButton: {
+    color: "#FB4B4E",
+  },
 }));
 
 const a11yProps = (index: number): A11yProps => {
@@ -53,8 +58,11 @@ const ChannelList = ({
   data,
   value,
   handleTabChange,
+  handleChannelLeave,
 }: UserListProps): JSX.Element => {
   const classes = useStyles();
+  console.log("in channellist, value is " + value);
+
   return (
     <Tabs
       orientation="vertical"
@@ -67,7 +75,25 @@ const ChannelList = ({
             <Tab
               className={classes.tab}
               key={roomName}
-              label={roomName}
+              label={
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-around"
+                  style={{ width: "100%" }}
+                >
+                  <Box>{roomName}</Box>
+                  <Box>
+                    <IconButton
+                      className={classes.closeButton}
+                      onClick={handleChannelLeave}
+                      data-name={roomName}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </Box>
+                </Box>
+              }
               {...a11yProps(index)}
             />
           ))

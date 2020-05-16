@@ -109,7 +109,30 @@ const Chat = (): JSX.Element => {
     e: React.ChangeEvent<{}>,
     newValue: number,
   ): void => {
-    setValue(newValue);
+    //e.preventDefault();
+    // const tag: string = (e.target as HTMLDivElement).tagName;
+    const index = Object.keys(channels)[newValue];
+    if (index !== undefined) {
+      //console.log((e.target as HTMLDivElement).tagName);
+      console.log(`new value is ${newValue}`);
+      setValue(newValue);
+    }
+  };
+
+  const handleChannelLeave = (e: React.MouseEvent<HTMLButtonElement>): void => {
+    e.preventDefault();
+    let room = e.currentTarget.getAttribute("data-name") as string;
+    if (room !== "lobby") {
+      // room = room as string;
+      const indexOfRoom = Object.keys(channels).indexOf(room);
+      delete channels[room];
+      console.log(`index of room before delete is ${indexOfRoom}`);
+      console.log(`current channel is ${value}`);
+      if (value === indexOfRoom) {
+        setChannels({ ...channels });
+        handleTabChange(e, 0);
+      }
+    }
   };
 
   const handleNewMessageChange = (
@@ -200,6 +223,7 @@ const Chat = (): JSX.Element => {
           data={channels}
           value={value}
           handleTabChange={handleTabChange}
+          handleChannelLeave={handleChannelLeave}
         />
       </Grid>
       <Grid item xs={8} className={classes.chatBoxColumn}>

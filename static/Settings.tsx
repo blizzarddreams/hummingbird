@@ -7,6 +7,7 @@ import {
   Tabs,
   Tab,
   makeStyles,
+  Hidden,
 } from "@material-ui/core";
 import { Theme, fade, darken } from "@material-ui/core/styles";
 import DarkModeContext from "./DarkMode";
@@ -89,8 +90,15 @@ const useStyles = makeStyles((theme: Theme) => ({
       borderColor: "#eee",
     },
   },
+  inputMobile: {
+    width: "80%",
+  },
   box: {
     flexGrow: 1,
+  },
+  boxMobile: {
+    display: "block",
+    width: "100%",
   },
 }));
 
@@ -218,121 +226,220 @@ const Settings = (): JSX.Element => {
   };
   return (
     <Box display="flex">
-      <Tabs
-        value={value}
-        onChange={handleTabChange}
-        orientation="vertical"
-        classes={{ indicator: classes.indicator }}
-      >
-        <Tab
-          label="Username & Email"
-          {...a11yProps(0)}
-          classes={{ root: classes.tab }}
-        />
-        <Tab
-          label="Password"
-          {...a11yProps(1)}
-          classes={{ root: classes.tab }}
-        />
-      </Tabs>
+      <Hidden xsDown>
+        <Tabs
+          value={value}
+          onChange={handleTabChange}
+          orientation={"vertical"}
+          classes={{ indicator: classes.indicator }}
+        >
+          <Tab
+            label="Username & Email"
+            {...a11yProps(0)}
+            classes={{ root: classes.tab }}
+          />
+          <Tab
+            label="Password"
+            {...a11yProps(1)}
+            classes={{ root: classes.tab }}
+          />
+        </Tabs>
 
-      <TabPanel value={value} index={0}>
-        <form onSubmit={handleSettingsSubmit}>
-          <Box display="flex" flexDirection="column" alignItems="center">
-            <TextField
-              name="username"
-              id="outlined-basic"
-              label="Username"
-              onChange={handleSettingsChange}
-              value={settings.username}
-              variant="outlined"
-              error={errors.username.length > 0}
-              helperText={errors.username.join("\n")}
-              classes={{
-                root: classes.input,
-              }}
-            />
+        <TabPanel value={value} index={0}>
+          <form onSubmit={handleSettingsSubmit}>
+            <Box display="flex" flexDirection="column" alignItems="center">
+              <TextField
+                name="username"
+                id="outlined-basic"
+                label="Username"
+                onChange={handleSettingsChange}
+                value={settings.username}
+                variant="outlined"
+                error={errors.username.length > 0}
+                helperText={errors.username.join("\n")}
+                classes={{
+                  root: classes.input,
+                }}
+              />
 
-            <TextField
-              name="email"
-              id="outlined-basic"
-              label="E-Mail"
-              onChange={handleSettingsChange}
-              value={settings.email}
-              error={errors.email.length > 0}
-              helperText={errors.email.join("\n")}
-              variant="outlined"
-              classes={{
-                root: classes.input,
-              }}
-            />
+              <TextField
+                name="email"
+                id="outlined-basic"
+                label="E-Mail"
+                onChange={handleSettingsChange}
+                value={settings.email}
+                error={errors.email.length > 0}
+                helperText={errors.email.join("\n")}
+                variant="outlined"
+                classes={{
+                  root: classes.input,
+                }}
+              />
 
-            <Button
-              variant="contained"
-              className={classes.button}
-              type="submit"
-            >
-              Submit
-            </Button>
-          </Box>
-        </form>
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <form onSubmit={handlePasswordSubmit}>
-          <Box display="flex" flexDirection="column" alignItems="center">
-            <TextField
-              name="oldPassword"
-              id="outlined-basic"
-              label="Password"
-              onChange={handleSettingsChange}
-              value={settings.oldPassword}
-              type={"password"}
-              error={errors.oldPassword.length > 0}
-              helperText={errors.oldPassword.join("\n")}
-              variant="outlined"
-              classes={{
-                root: classes.input,
-              }}
-            />
+              <Button
+                variant="contained"
+                className={classes.button}
+                type="submit"
+              >
+                Submit
+              </Button>
+            </Box>
+          </form>
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          <form onSubmit={handlePasswordSubmit}>
+            <Box display="flex" flexDirection="column" alignItems="center">
+              <TextField
+                name="oldPassword"
+                id="outlined-basic"
+                label="Password"
+                onChange={handleSettingsChange}
+                value={settings.oldPassword}
+                type={"password"}
+                error={errors.oldPassword.length > 0}
+                helperText={errors.oldPassword.join("\n")}
+                variant="outlined"
+                classes={{
+                  root: classes.input,
+                }}
+              />
 
-            <TextField
-              name="newPassword"
-              id="outlined-basic"
-              label="New Password"
-              onChange={handleSettingsChange}
-              value={settings.newPassword}
-              error={errors.newPassword.length > 0}
-              helperText={errors.newPassword.join("\n")}
-              variant="outlined"
-              classes={{
-                root: classes.input,
-              }}
-            />
+              <TextField
+                name="newPassword"
+                id="outlined-basic"
+                label="New Password"
+                onChange={handleSettingsChange}
+                value={settings.newPassword}
+                error={errors.newPassword.length > 0}
+                helperText={errors.newPassword.join("\n")}
+                variant="outlined"
+                classes={{
+                  root: classes.input,
+                }}
+              />
 
-            <TextField
-              name="repeatNewPassword"
-              id="outlined-basic"
-              label="Confirm New Password"
-              onChange={handleSettingsChange}
-              error={errors.repeatNewPassword.length > 0}
-              helperText={errors.repeatNewPassword.join("\n")}
-              value={settings.repeatNewPassword}
-              variant="outlined"
-              classes={{
-                root: classes.input,
-              }}
-            />
+              <TextField
+                name="repeatNewPassword"
+                id="outlined-basic"
+                label="Confirm New Password"
+                onChange={handleSettingsChange}
+                error={errors.repeatNewPassword.length > 0}
+                helperText={errors.repeatNewPassword.join("\n")}
+                value={settings.repeatNewPassword}
+                variant="outlined"
+                classes={{
+                  root: classes.input,
+                }}
+              />
 
-            <Button
-              variant="contained"
-              className={classes.button}
-              type="submit"
-            >
-              Submit
-            </Button>
-          </Box>
-        </form>
-      </TabPanel>
+              <Button
+                variant="contained"
+                className={classes.button}
+                type="submit"
+              >
+                Submit
+              </Button>
+            </Box>
+          </form>
+        </TabPanel>
+      </Hidden>
+      <Hidden smUp>
+        <Box className={classes.boxMobile}>
+          <form onSubmit={handleSettingsSubmit}>
+            <Box display="flex" flexDirection="column" alignItems="center">
+              <TextField
+                name="username"
+                id="outlined-basic"
+                label="Username"
+                onChange={handleSettingsChange}
+                value={settings.username}
+                variant="outlined"
+                error={errors.username.length > 0}
+                helperText={errors.username.join("\n")}
+                classes={{
+                  root: `${classes.input} ${classes.inputMobile}`,
+                }}
+              />
+
+              <TextField
+                name="email"
+                id="outlined-basic"
+                label="E-Mail"
+                onChange={handleSettingsChange}
+                value={settings.email}
+                error={errors.email.length > 0}
+                helperText={errors.email.join("\n")}
+                variant="outlined"
+                classes={{
+                  root: `${classes.input} ${classes.inputMobile}`,
+                }}
+              />
+
+              <Button
+                variant="contained"
+                className={classes.button}
+                type="submit"
+              >
+                Submit
+              </Button>
+            </Box>
+          </form>
+          <form onSubmit={handlePasswordSubmit}>
+            <Box display="flex" flexDirection="column" alignItems="center">
+              <TextField
+                name="oldPassword"
+                id="outlined-basic"
+                label="Password"
+                onChange={handleSettingsChange}
+                value={settings.oldPassword}
+                type={"password"}
+                error={errors.oldPassword.length > 0}
+                helperText={errors.oldPassword.join("\n")}
+                variant="outlined"
+                classes={{
+                  root: `${classes.input} ${classes.inputMobile}`,
+                }}
+              />
+
+              <TextField
+                name="newPassword"
+                id="outlined-basic"
+                label="New Password"
+                onChange={handleSettingsChange}
+                value={settings.newPassword}
+                error={errors.newPassword.length > 0}
+                helperText={errors.newPassword.join("\n")}
+                variant="outlined"
+                classes={{
+                  root: `${classes.input} ${classes.inputMobile}`,
+                }}
+              />
+
+              <TextField
+                name="repeatNewPassword"
+                id="outlined-basic"
+                label="Confirm New Password"
+                onChange={handleSettingsChange}
+                error={errors.repeatNewPassword.length > 0}
+                helperText={errors.repeatNewPassword.join("\n")}
+                value={settings.repeatNewPassword}
+                variant="outlined"
+                classes={{
+                  root: `${classes.input} ${classes.inputMobile}`,
+                }}
+              />
+
+              <Button
+                variant="contained"
+                className={classes.button}
+                type="submit"
+              >
+                Submit
+              </Button>
+            </Box>
+          </form>
+        </Box>
+      </Hidden>
     </Box>
   );
 };

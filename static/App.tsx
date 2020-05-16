@@ -1,17 +1,10 @@
 import Cookies from "js-cookie";
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter, Switch } from "react-router-dom";
 import Chat from "./Chat";
 import Login from "./Login";
-import {
-  makeStyles,
-  Box,
-  IconButton,
-  Container,
-  Fab,
-  darken,
-} from "@material-ui/core";
+import { makeStyles, Box, Fab, darken } from "@material-ui/core";
 import {
   Brightness2 as MoonIcon,
   Brightness5 as SunIcon,
@@ -26,6 +19,11 @@ import DarkModeContext from "./DarkMode";
 
 interface StyleProps {
   darkMode: boolean;
+}
+
+interface Drawer {
+  channelList: boolean;
+  userList: boolean;
 }
 
 const useStyles = makeStyles(() => ({
@@ -63,6 +61,11 @@ const App = (): JSX.Element => {
     Cookies.get("darkMode") === "true" ? true : false,
   );
 
+  const [drawer, setDrawer] = useState<Drawer>({
+    channelList: false,
+    userList: false,
+  });
+
   const toggleDarkMode = (): void => {
     const darkThemeCurrentValue = Cookies.get("darkMode");
     Cookies.set(
@@ -72,15 +75,36 @@ const App = (): JSX.Element => {
     setDarkMode(!darkMode);
   };
 
+  const toggleUserList = (): void => {
+    setDrawer({
+      ...drawer,
+      userList: !drawer.userList,
+    });
+  };
+
+  const toggleChannelList = (): void => {
+    setDrawer({
+      ...drawer,
+      channelList: !drawer.channelList,
+    });
+  };
+
   const classes = useStyles({ darkMode });
   return (
     <Box className={classes.container}>
       <DarkModeContext.Provider value={darkMode}>
         <BrowserRouter>
-          <Navbar />
+          <Navbar
+            toggleChannelList={toggleChannelList}
+            toggleUserList={toggleUserList}
+          />
           <Switch>
             <PrivateRoute path="/app">
-              <Chat />
+              <Chat
+                drawer={drawer}
+                toggleChannelList={toggleChannelList}
+                toggleUserList={toggleUserList}
+              />
             </PrivateRoute>
             <GuestRoute path="/login">
               <Login />

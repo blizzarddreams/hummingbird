@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import {
   IconButton,
@@ -9,12 +9,15 @@ import {
   makeStyles,
   ClickAwayListener,
   Box,
+  Hidden,
 } from "@material-ui/core";
 
 import {
   Settings as SettingsIcon,
   ExitToApp as LogOutIcon,
   ArrowBack as ArrowIcon,
+  List as ListIcon,
+  People as PeopleIcon,
 } from "@material-ui/icons";
 
 import Gravatar from "./Gravatar";
@@ -24,6 +27,12 @@ import DarkModeContext from "./DarkMode";
 interface StyleProps {
   darkMode: boolean;
 }
+
+interface NavbarProps {
+  toggleChannelList: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  toggleUserList: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
 const useStyles = makeStyles(() => ({
   navBar: (props: StyleProps) => ({
     backgroundColor: props.darkMode ? "#0a0e0c" : "#dff7eb",
@@ -51,12 +60,14 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const Navbar = (): JSX.Element => {
+const Navbar = ({
+  toggleChannelList,
+  toggleUserList,
+}: NavbarProps): JSX.Element => {
   const darkMode = useContext(DarkModeContext);
   const history = useHistory();
   const location = useLocation();
   const classes = useStyles({ darkMode });
-  //const [email, setEmail] = useState(Cookies.get());
   const [open, setOpen] = useState(false);
 
   const handleTooltipOpen = (): void => setOpen(true);
@@ -71,7 +82,6 @@ const Navbar = (): JSX.Element => {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          //setEmail("");
           history.push("/");
         }
       });
@@ -89,6 +99,21 @@ const Navbar = (): JSX.Element => {
               <ArrowIcon onClick={(): void => history.goBack()} />
             </IconButton>
           ) : null}
+          <Hidden smUp>
+            {location.pathname === "/app" ? (
+              <>
+                <IconButton className={classes.icons} onClick={toggleUserList}>
+                  <PeopleIcon />
+                </IconButton>
+                <IconButton
+                  className={classes.icons}
+                  onClick={toggleChannelList}
+                >
+                  <ListIcon />
+                </IconButton>
+              </>
+            ) : null}
+          </Hidden>
         </Box>
         <Box>
           {Cookies.get("email") ? (

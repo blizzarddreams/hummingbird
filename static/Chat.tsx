@@ -1,5 +1,11 @@
 import React, { useRef, useState, useEffect, useContext } from "react";
-import { Grid, TextField, makeStyles } from "@material-ui/core";
+import {
+  Grid,
+  TextField,
+  makeStyles,
+  Hidden,
+  SwipeableDrawer,
+} from "@material-ui/core";
 import UserList from "./UserList";
 import Messages from "./Messages";
 import { Theme, fade } from "@material-ui/core/styles";
@@ -36,6 +42,7 @@ interface ChatData {
     userlist: SocketUserList;
   };
 }
+
 interface AuthData {
   success: boolean;
   id: string;
@@ -55,6 +62,15 @@ interface StyleProps {
   darkMode: boolean;
 }
 
+interface ChatProps {
+  drawer: {
+    userList: boolean;
+    channelList: boolean;
+  };
+  toggleChannelList: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  toggleUserList: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
 type ADifferentUserIsDisconnecting = ADifferentUserJoinedARoom;
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -69,8 +85,29 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     flexDirection: "column-reverse",
   },
+  channelListButton: (props: StyleProps) => ({
+    backgroundColor: props.darkMode ? "#dff0f7" : "#070914",
+    color: props.darkMode ? "#070914" : "#dff0f7",
+    position: "fixed",
+    left: 0,
+    top: "4rem !important",
+    margin: "2rem !important",
+  }),
+  userListButton: (props: StyleProps) => ({
+    backgroundColor: props.darkMode ? "#dff0f7" : "#070914",
+    color: props.darkMode ? "#070914" : "#dff0f7",
+    position: "fixed",
+    left: 0,
+    top: "10rem !important",
+    margin: "2rem !important",
+  }),
+  drawer: (props: StyleProps) => ({
+    backgroundColor: props.darkMode ? "#0a0e0c" : "#dff7eb",
+    color: props.darkMode ? "#dff7eb" : "#0a0e0c",
+    width: "100%",
+  }),
+
   input: {
-    //margin: theme.spacing(2),
     height: "20% !important",
     "& .MuiFormLabel-root": {
       color: (props: StyleProps): string => (props.darkMode ? "#eee" : "#222"),
@@ -89,11 +126,16 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
   },
 }));
-const Chat = (): JSX.Element => {
+const Chat = ({
+  drawer,
+  toggleUserList,
+  toggleChannelList,
+}: ChatProps): JSX.Element => {
   const darkMode = useContext(DarkModeContext);
   const classes = useStyles({ darkMode });
   const { current: socket } = useRef(socketio);
   const [value, setValue] = useState(0);
+
   const [channels, setChannels] = useState<ChatData>({} as ChatData);
   const [newMessage, setNewMessage] = useState("");
 
@@ -122,7 +164,7 @@ const Chat = (): JSX.Element => {
 
   const handleChannelLeave = (e: React.MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
-    let room = e.currentTarget.getAttribute("data-name") as string;
+    const room = e.currentTarget.getAttribute("data-name") as string;
     if (room !== "lobby") {
       // room = room as string;
       const indexOfRoom = Object.keys(channels).indexOf(room);
@@ -222,34 +264,82 @@ const Chat = (): JSX.Element => {
   }, []);
 
   return (
-    <Grid container className={classes.chatBox} spacing={0}>
-      <Grid item xs={2} className={classes.chatBoxColumn}>
-        <ChannelList
-          data={channels}
-          value={value}
-          handleTabChange={handleTabChange}
-          handleChannelLeave={handleChannelLeave}
-        />
-      </Grid>
-      <Grid item xs={8} className={classes.chatBoxColumn}>
-        <Messages data={channels} value={value} />
-      </Grid>
-      <Grid item xs={2} className={classes.chatBoxColumn}>
-        <UserList data={channels} value={value} />
-      </Grid>
-      <Grid item xs={12} className={classes.newMessageColumn}>
-        <form onSubmit={handleNewMessageSubmit}>
-          <TextField
-            name="message"
-            fullWidth
-            variant="outlined"
-            onChange={handleNewMessageChange}
-            value={newMessage}
-            classes={{ root: classes.input }}
-          />
-        </form>
-      </Grid>
-    </Grid>
+    <>
+      <Hidden smUp>
+        <Grid container className={classes.chatBox} spacing={0}>
+          <SwipeableDrawer
+            anchor={"left"}
+            data-name={"channelList"}
+            open={drawer.channelList}
+            onClose={toggleChannelList}
+            onOpen={toggleChannelList}
+            classes={{ paper: classes.drawer }}
+          >
+            <ChannelList
+              data={channels}
+              value={value}
+              handleTabChange={handleTabChange}
+              handleChannelLeave={handleChannelLeave}
+            />
+          </SwipeableDrawer>
+          <SwipeableDrawer
+            anchor={"right"}
+            data-name={"userList"}
+            open={drawer.userList}
+            onClose={toggleUserList}
+            onOpen={toggleUserList}
+            classes={{ paper: classes.drawer }}
+          >
+            <UserList data={channels} value={value} />
+          </SwipeableDrawer>
+          <Grid item xs={12} className={classes.chatBoxColumn}>
+            <Messages data={channels} value={value} />
+          </Grid>
+          <Grid item xs={12}>
+            <form onSubmit={handleNewMessageSubmit}>
+              <TextField
+                name="message"
+                fullWidth
+                variant="outlined"
+                onChange={handleNewMessageChange}
+                value={newMessage}
+                classes={{ root: classes.input }}
+              />
+            </form>
+          </Grid>
+        </Grid>
+      </Hidden>
+      <Hidden xsDown>
+        <Grid container className={classes.chatBox} spacing={0}>
+          <Grid item xs={2} className={classes.chatBoxColumn}>
+            <ChannelList
+              data={channels}
+              value={value}
+              handleTabChange={handleTabChange}
+              handleChannelLeave={handleChannelLeave}
+            />
+          </Grid>
+          <Grid item xs={8} className={classes.chatBoxColumn}>
+            <Messages data={channels} value={value} />
+          </Grid>
+          <Grid item xs={2} className={classes.chatBoxColumn}>
+            <UserList data={channels} value={value} />
+          </Grid>
+          <Grid item xs={12} className={classes.newMessageColumn}>
+            <form onSubmit={handleNewMessageSubmit}>
+              <TextField
+                name="message"
+                fullWidth
+                variant="outlined"
+                onChange={handleNewMessageChange}
+                value={newMessage}
+                classes={{ root: classes.input }}
+              />
+            </form>
+          </Grid>
+        </Grid>
+      </Hidden>
+    </>
   );
 };
 

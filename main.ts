@@ -8,6 +8,7 @@ import helmet from "helmet";
 import http from "http";
 import redis from "redis";
 import flash from "express-flash";
+import csurf from "csurf";
 import socketio, { Server } from "socket.io";
 import cors from "cors";
 import { passport } from "./authentication";
@@ -36,17 +37,18 @@ app.use(
     saveUninitialized: false,
   }),
 );
-app.use(helmet());
-app.use(cors());
-app.use(flash());
 app.use(body.json());
 app.use(body.urlencoded({ extended: true }));
 app.use(cookie());
+app.use(csurf({ cookie: true }));
+app.use(helmet());
+app.use(cors());
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use("/", router);
 app.get("*", (req, res) => {
-  // res.cookie("XSRF-TOKEN", req.csrfToken());
+  res.cookie("XSRF-TOKEN", req.csrfToken());
   res.sendFile(path.join(__dirname, "/views/index.html"));
 });
 

@@ -11,6 +11,7 @@ import {
   Button,
 } from "@material-ui/core";
 import DarkModeContext from "./DarkMode";
+import Cookies from "js-cookie";
 
 interface StyleProps {
   darkMode: boolean;
@@ -58,7 +59,11 @@ const SettingsTooltip = (): JSX.Element => {
   const classes = useStyles({ darkMode });
 
   useEffect(() => {
-    fetch("/user/status/default")
+    fetch("/user/status/default", {
+      headers: {
+        "X-CSRF-TOKEN": Cookies.get("XSRF-TOKEN")!,
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -77,6 +82,7 @@ const SettingsTooltip = (): JSX.Element => {
       credentials: "include",
       body: JSON.stringify({ status }),
       headers: {
+        "X-CSRF-TOKEN": Cookies.get("XSRF-TOKEN")!,
         "Content-Type": "application/json",
       },
     })

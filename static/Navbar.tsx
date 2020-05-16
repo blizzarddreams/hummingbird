@@ -63,7 +63,11 @@ const Navbar = (): JSX.Element => {
 
   const handleTooltipClose = (): void => setOpen(false);
   const handleLogOut = (): void => {
-    fetch("/logout")
+    fetch("/logout", {
+      headers: {
+        "X-CSRF-TOKEN": Cookies.get("XSRF-TOKEN")!,
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {

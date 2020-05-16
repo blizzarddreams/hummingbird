@@ -14,6 +14,7 @@ import { GitHub as GitHubIcon } from "@material-ui/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import DarkModeContext from "./DarkMode";
+import Cookies from "js-cookie";
 
 interface StyleProps {
   darkMode: boolean;
@@ -103,7 +104,10 @@ const Login = (): JSX.Element => {
     fetch("/login", {
       method: "POST",
       body: JSON.stringify(postData),
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": Cookies.get("XSRF-TOKEN")!,
+      },
     })
       .then((res) => {
         if (res.status === 401) {

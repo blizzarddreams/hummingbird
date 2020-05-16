@@ -6,6 +6,7 @@ import { Theme, fade } from "@material-ui/core/styles";
 import io from "socket.io-client";
 import ChannelList from "./ChannelList";
 import DarkModeContext from "./DarkMode";
+import Cookies from "js-cookie";
 
 const socketio = io();
 
@@ -207,7 +208,11 @@ const Chat = (): JSX.Element => {
   }, [channels]);
 
   useEffect(() => {
-    fetch("/user/get-id")
+    fetch("/user/get-id", {
+      headers: {
+        "X-CSRF-TOKEN": Cookies.get("XSRF-TOKEN")!,
+      },
+    })
       .then((res) => res.json())
       .then((json: AuthData) => {
         if (json.success) {

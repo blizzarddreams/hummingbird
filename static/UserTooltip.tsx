@@ -13,6 +13,7 @@ import Gravatar from "./Gravatar";
 import Moment from "./Moment";
 import { CalendarToday as CalendarIcon } from "@material-ui/icons";
 import DarkModeContext from "./DarkMode";
+import Cookies from "js-cookie";
 
 interface StyleProps {
   darkMode: boolean;
@@ -76,7 +77,11 @@ const UserTooltip = ({ username }: UserTooltipProps): JSX.Element => {
   });
 
   useEffect(() => {
-    fetch(`/user/status?username=${username}`)
+    fetch(`/user/status?username=${username}`, {
+      headers: {
+        "X-CSRF-TOKEN": Cookies.get("XSRF-TOKEN")!,
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {

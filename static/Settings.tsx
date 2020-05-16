@@ -10,6 +10,7 @@ import {
 } from "@material-ui/core";
 import { Theme, fade, darken } from "@material-ui/core/styles";
 import DarkModeContext from "./DarkMode";
+import Cookies from "js-cookie";
 
 interface SettingsData {
   username: string;
@@ -156,6 +157,7 @@ const Settings = (): JSX.Element => {
       body: data,
       headers: {
         "Content-Type": "application/json",
+        "X-CSRF-TOKEN": Cookies.get("XSRF-TOKEN")!,
       },
     })
       .then((res) => res.json())
@@ -180,6 +182,7 @@ const Settings = (): JSX.Element => {
       body: data,
       headers: {
         "Content-Type": "application/json",
+        "X-CSRF-TOKEN": Cookies.get("XSRF-TOKEN")!,
       },
     })
       .then((res) => res.json())
@@ -195,6 +198,9 @@ const Settings = (): JSX.Element => {
   useEffect(() => {
     fetch("/settings/default", {
       credentials: "include",
+      headers: {
+        "X-CSRF-TOKEN": Cookies.get("XSRF-TOKEN")!,
+      },
     })
       .then((res) => res.json())
       .then((data) => {

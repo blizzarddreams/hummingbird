@@ -86,6 +86,7 @@
     "socket.io-client": "^2.3.0",
     "source-map-loader": "^0.2.4",
     "ts-node": "3.3.0",
+    "typescript": "^3.8.3",
     "typeorm": "^0.2.22",
     "webpack-bundle-analyzer": "^3.7.0"
   },
@@ -136,7 +137,6 @@
     "terser-webpack-plugin": "^2.3.2",
     "ts-jest": "^25.2.1",
     "ts-loader": "^6.2.1",
-    "typescript": "^3.8.3",
     "webpack": "^4.42.0",
     "webpack-cli": "^3.3.10"
   }

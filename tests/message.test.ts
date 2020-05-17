@@ -39,7 +39,7 @@ describe("messages", () => {
         expect.objectContaining({
           constraints: {
             minLength: "data must be longer than or equal to 1 characters",
-            isNotEmpty: "data should not be empty",
+            isNotEmptyString: "Text must not be blank.",
           },
         }),
       ]),

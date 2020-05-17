@@ -4,6 +4,7 @@ const TerserWebpackPlugin = require("terser-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
+const CopyPlugin = require("copy-webpack-plugin");
 const path = require("path");
 const webpack = require("webpack");
 
@@ -15,6 +16,14 @@ module.exports = {
   mode: "production",
   devtool: "",
   plugins: [
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.join(__dirname, "/views/index.html"),
+          to: path.join(__dirname, "/build/views/index.html"),
+        },
+      ],
+    }),
     new MiniCssExtractPlugin({
       filename: "[name].css",
     }),

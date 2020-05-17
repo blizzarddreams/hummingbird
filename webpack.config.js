@@ -20,7 +20,7 @@ module.exports = {
     }),
     // @ts-ignore
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-    new BundleAnalyzerPlugin(),
+    //new BundleAnalyzerPlugin(),
   ],
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".json"],

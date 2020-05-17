@@ -9,8 +9,8 @@ const webpack = require("webpack");
 
 module.exports = {
   entry: [
-    path.join(__dirname, "static/app.scss"),
-    path.join(__dirname, "static/App.tsx"),
+    path.join(__dirname, "resources/app.scss"),
+    path.join(__dirname, "resources/App.tsx"),
   ],
   mode: "production",
   devtool: "",

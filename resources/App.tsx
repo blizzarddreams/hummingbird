@@ -60,18 +60,15 @@ const App = (): JSX.Element => {
   const [darkMode, setDarkMode] = useState(
     Cookies.get("darkMode") === "true" ? true : false,
   );
-
   const [drawer, setDrawer] = useState<Drawer>({
     channelList: false,
     userList: false,
   });
+  const classes = useStyles({ darkMode });
 
   const toggleDarkMode = (): void => {
-    const darkThemeCurrentValue = Cookies.get("darkMode");
-    Cookies.set(
-      "darkMode",
-      darkThemeCurrentValue === "true" ? "false" : "true",
-    );
+    const darkModeCurrentValue = Cookies.get("darkMode");
+    Cookies.set("darkMode", darkModeCurrentValue === "true" ? "false" : "true");
     setDarkMode(!darkMode);
   };
 
@@ -89,7 +86,6 @@ const App = (): JSX.Element => {
     });
   };
 
-  const classes = useStyles({ darkMode });
   return (
     <Box className={classes.container}>
       <DarkModeContext.Provider value={darkMode}>

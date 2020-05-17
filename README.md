@@ -1,2 +1,2 @@
 Hummingbird
-webchat made with nodejs, typescript, expressjs, and socket.io.
+webchat made with typescript, expressjs, postgres, and socket.io.

@@ -19,8 +19,8 @@
     "url": "git+https://github.com/notblizzard/hummingbnird.git"
   },
   "engines": {
-    "node": "13.11.0"
-  }
+    "node": "13.11.x"
+  },
   "author": "NotBlizzard (Anthony Asberry)",
   "license": "MIT",
   "bugs": {

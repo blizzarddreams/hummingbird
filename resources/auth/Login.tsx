@@ -91,7 +91,6 @@ const Login = (): JSX.Element => {
 
   const handleGithubOauth = (): void => {
     window.location.replace("/auth/github");
-    //history.push("/auth/github");
   };
 
   const handleGoogleOauth = (): void => {

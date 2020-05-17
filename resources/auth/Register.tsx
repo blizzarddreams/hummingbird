@@ -93,12 +93,12 @@ const Register = (): JSX.Element => {
     setData({ ...data, [name]: e.target.value });
   };
 
-  const handleGithubOauth = async (): Promise<void> => {
-    await fetch("/auth/github", {
-      headers: {
-        "X-CSRF-TOKEN": Cookies.get("XSRF-TOKEN")!,
-      },
-    });
+  const handleGithubOauth = (): void => {
+    window.location.replace("/auth/github");
+  };
+
+  const handleGoogleOauth = (): void => {
+    window.location.replace("/auth/google");
   };
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -185,9 +185,13 @@ const Register = (): JSX.Element => {
               onClick={handleGithubOauth}
             >
               <GitHubIcon />
-              {" Github"}
+              {` Github`}
             </Button>
-            <Button variant="contained" className={classes.google}>
+            <Button
+              variant="contained"
+              className={classes.google}
+              onClick={handleGoogleOauth}
+            >
               <FontAwesomeIcon icon={faGoogle} /> Google
             </Button>
           </Box>

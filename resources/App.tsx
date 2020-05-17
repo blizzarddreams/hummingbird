@@ -2,19 +2,19 @@ import Cookies from "js-cookie";
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter, Switch } from "react-router-dom";
-import Chat from "./Chat";
-import Login from "./Login";
+import Chat from "./chat/Chat";
+import Login from "./auth/Login";
 import { makeStyles, Box, Fab, darken } from "@material-ui/core";
 import {
   Brightness2 as MoonIcon,
   Brightness5 as SunIcon,
 } from "@material-ui/icons";
 import Navbar from "./Navbar";
-import Settings from "./Settings";
+import Settings from "./user/Settings";
 import Welcome from "./Welcome";
-import Register from "./Register";
-import PrivateRoute from "./PrivateRoute";
-import GuestRoute from "./GuestRoute";
+import Register from "./auth/Register";
+import PrivateRoute from "./auth/PrivateRoute";
+import GuestRoute from "./auth/GuestRoute";
 import DarkModeContext from "./DarkMode";
 
 interface StyleProps {

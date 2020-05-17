@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useContext } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Typography,
   Box,
@@ -6,10 +6,10 @@ import {
   ClickAwayListener,
   makeStyles,
 } from "@material-ui/core";
-import Gravatar from "./Gravatar";
-import Moment from "./Moment";
+import Gravatar from "../util/Gravatar";
+import Moment from "../util/Moment";
 import UserTooltip from "./UserTooltip";
-// import DarkModeContext from "./DarkMode";
+
 interface MessagesProps {
   data: ChatData;
   value: any;

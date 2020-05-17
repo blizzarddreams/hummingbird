@@ -6,32 +6,20 @@ import {
   fade,
   CardContent,
   Box,
+  TextField,
   darken,
-  Typography,
+  Button,
 } from "@material-ui/core";
-import Gravatar from "./Gravatar";
-import Moment from "./Moment";
-import { CalendarToday as CalendarIcon } from "@material-ui/icons";
-import DarkModeContext from "./DarkMode";
+import DarkModeContext from "../DarkMode";
 import Cookies from "js-cookie";
 
 interface StyleProps {
   darkMode: boolean;
 }
-
-interface UserTooltipProps {
-  username: string;
-}
-
 const useStyles = makeStyles((theme: Theme) => ({
   card: (props: StyleProps) => ({
     color: props.darkMode ? "#dff7eb" : "#0a0e0c",
     backgroundColor: props.darkMode ? "#dff7eb" : "#0a0e0c",
-  }),
-
-  box: (props: StyleProps) => ({
-    color: `${props.darkMode ? "#0a0e0c" : "#dff7eb"}!important`,
-    //backgroundColor: props.darkTheme ? "#dff7eb" : "#0a0e0c",
   }),
 
   input: {
@@ -65,19 +53,13 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-const UserTooltip = ({ username }: UserTooltipProps): JSX.Element => {
+const SettingsTooltip = (): JSX.Element => {
   const darkMode = useContext(DarkModeContext);
+  const [status, setStatus] = useState("");
   const classes = useStyles({ darkMode });
-  const [user, setUser] = useState({
-    username: "",
-    email: "",
-    createdAt: "",
-    status: "",
-    color: "",
-  });
 
   useEffect(() => {
-    fetch(`/user/status?username=${username}`, {
+    fetch("/user/status/default", {
       headers: {
         "X-CSRF-TOKEN": Cookies.get("XSRF-TOKEN")!,
       },
@@ -85,39 +67,60 @@ const UserTooltip = ({ username }: UserTooltipProps): JSX.Element => {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          setUser({ ...data.user });
+          setStatus(data.status);
         }
       });
   }, []);
+  const handleStatusChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setStatus(e.target.value);
+  };
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+    fetch("/user/status/update", {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify({ status }),
+      headers: {
+        "X-CSRF-TOKEN": Cookies.get("XSRF-TOKEN")!,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setStatus(data.status);
+      });
+  };
   return (
     <Card classes={{ root: classes.card }}>
-      <CardContent>
+      <CardContent style={{ width: "100%" }}>
         <Box
           display="flex"
-          //flexDirection="column"
           flexDirection="column"
-          //alignItems="center"
-          // style={{ width: "100%" }}
+          alignItems="center"
+          style={{ width: "100%" }}
         >
-          <Gravatar email={user.email} size={6} />
-          <Box className={classes.box}>
-            <Typography
-              variant="h5"
-              style={{ color: user.color, fontWeight: "bold" }}
-            >
-              {user.username}
-            </Typography>
-            <Typography variant="body2">
-              <CalendarIcon /> Registered{" "}
-              <Moment time={user.createdAt} tooltip={true} />
-            </Typography>
-            <Typography variant="body1">{user.status}</Typography>
-          </Box>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              name="Status"
+              id="outlined-basic"
+              fullWidth
+              label="Status"
+              onChange={handleStatusChange}
+              value={status}
+              variant="outlined"
+              classes={{
+                root: classes.input,
+              }}
+            />
+            <Button type="submit" className={classes.button}>
+              Save
+            </Button>
+          </form>
         </Box>
       </CardContent>
     </Card>
   );
 };
 
-export default UserTooltip;
+export default SettingsTooltip;

@@ -9,7 +9,7 @@ import {
   ClickAwayListener,
   Theme,
 } from "@material-ui/core";
-import Gravatar from "./Gravatar";
+import Gravatar from "../util/Gravatar";
 import UserTooltip from "./UserTooltip";
 interface UserListProps {
   data: ChatData;

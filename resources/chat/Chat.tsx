@@ -11,10 +11,8 @@ import Messages from "./Messages";
 import { Theme, fade } from "@material-ui/core/styles";
 import io from "socket.io-client";
 import ChannelList from "./ChannelList";
-import DarkModeContext from "./DarkMode";
+import DarkModeContext from "../DarkMode";
 import Cookies from "js-cookie";
-
-const socketio = io();
 
 interface SocketUser {
   username: string;
@@ -27,11 +25,6 @@ interface SocketMessage {
   message: string;
   timestamp: Date;
   room: string;
-}
-interface SocketRoom {
-  room: string;
-  userlist: SocketUserList;
-  messages: SocketMessages;
 }
 
 type SocketUserList = SocketUser[];
@@ -72,6 +65,8 @@ interface ChatProps {
 }
 
 type ADifferentUserIsDisconnecting = ADifferentUserJoinedARoom;
+
+const socketio = io();
 
 const useStyles = makeStyles((theme: Theme) => ({
   chatBox: {

@@ -10,7 +10,7 @@ import {
   Hidden,
 } from "@material-ui/core";
 import { Theme, fade, darken } from "@material-ui/core/styles";
-import DarkModeContext from "./DarkMode";
+import DarkModeContext from "../DarkMode";
 import Cookies from "js-cookie";
 
 interface SettingsData {

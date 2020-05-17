@@ -20,8 +20,8 @@ import {
   People as PeopleIcon,
 } from "@material-ui/icons";
 
-import Gravatar from "./Gravatar";
-import SettingsTooltip from "./SettingsTooltip";
+import Gravatar from "./util/Gravatar";
+import SettingsTooltip from "./user/SettingsTooltip";
 import DarkModeContext from "./DarkMode";
 
 interface StyleProps {

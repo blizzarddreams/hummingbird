@@ -3,21 +3,25 @@ import { Route, Redirect } from "react-router-dom";
 import PropType from "prop-types";
 import Cookies from "js-cookie";
 
-interface GuestRouteProps {
+interface PrivateRouteProps {
   children: React.ReactNode;
   path: string;
 }
-const GuestRoute = ({ children, ...rest }: GuestRouteProps): JSX.Element => {
+
+const PrivateRoute = ({
+  children,
+  ...rest
+}: PrivateRouteProps): JSX.Element => {
   return (
     <Route
       {...rest}
       render={({ location }): JSX.Element | React.ReactNode =>
-        !Cookies.get("email") ? (
+        Cookies.get("email") ? (
           children
         ) : (
           <Redirect
             to={{
-              pathname: "/app",
+              pathname: "/login",
               state: { from: location },
             }}
           />
@@ -27,8 +31,8 @@ const GuestRoute = ({ children, ...rest }: GuestRouteProps): JSX.Element => {
   );
 };
 
-GuestRoute.propTypes = {
+PrivateRoute.propTypes = {
   children: PropType.element,
 };
 
-export default GuestRoute;
+export default PrivateRoute;

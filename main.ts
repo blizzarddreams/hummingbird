@@ -22,7 +22,6 @@ interface UserServer extends Server {
 }
 
 const app = express();
-db();
 const server = http.createServer(app);
 const client = redis.createClient(process.env.REDIS_URL || "");
 
@@ -54,6 +53,7 @@ app.get("*", (req, res) => {
 
 const io: UserServer = socketio(server);
 websocket(io);
+db();
 
 const port = process.env.PORT || 8000;
 server.listen(port, () => console.log(`Listening on port ${port}`));

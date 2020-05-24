@@ -6,8 +6,6 @@ import { validate, ValidationError } from "class-validator";
 import { User } from "./models";
 import jwt from "jsonwebtoken";
 
-const router = express.Router();
-
 interface Errors {
   [key: string]: string[];
 }
@@ -20,6 +18,8 @@ interface RequestUser {
 interface SettingsError extends ValidationError {
   constraints: {};
 }
+
+const router = express.Router();
 
 router.post("/login", passport.authenticate("local"), (req, res) => {
   const token = jwt.sign(

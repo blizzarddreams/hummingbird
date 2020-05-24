@@ -16,12 +16,6 @@ interface SocketMessage {
   room: string;
 }
 
-interface SocketRoom {
-  room: string;
-  userlist: SocketUserList;
-  messages: SocketMessages;
-}
-
 type SocketUserList = SocketUser[];
 type SocketMessages = SocketMessage[];
 
@@ -29,17 +23,6 @@ interface SocketUserMessage {
   room: string;
   message: string;
   user?: SocketUser;
-}
-
-interface SocketUserWithRoom {
-  user: SocketUser;
-  room: string;
-}
-
-interface SocketUserWithRoomAndUserList {
-  user: SocketUser;
-  userlist: UserList;
-  room: string;
 }
 
 interface ConnectedSocketUser extends Socket {

@@ -19,6 +19,10 @@ module.exports = {
     ],
     "@typescript-eslint/no-non-null-assertion": [0],
     "@typescript-eslint/camelcase": ["error", { allow: ["created_at"] }],
+    "@typescript-eslint/explicit-function-return-type": [
+      "error",
+      { allowExpressions: true },
+    ],
     "dot-notation": [2],
   },
 };

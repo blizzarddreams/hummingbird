@@ -60,8 +60,6 @@ const useStyles = makeStyles(() => ({
   },
 }));
 const TabPanel = (props: TabPanelProps): JSX.Element => {
-  //const classes = useStyles();
-  // eslint-disable-next-line react/prop-types
   const { children, value, index, ...other } = props;
   return (
     <Typography
@@ -77,7 +75,6 @@ const TabPanel = (props: TabPanelProps): JSX.Element => {
   );
 };
 const Messages = ({ data, value }: MessagesProps): JSX.Element => {
-  // const darkMode = useContext(DarkModeContext);
   const messageRef = useRef<HTMLDivElement>(null);
   const classes = useStyles();
 
@@ -90,9 +87,9 @@ const Messages = ({ data, value }: MessagesProps): JSX.Element => {
   useEffect(() => {
     if (messageRef.current !== null) {
       messageRef.current.scrollIntoView();
-      //window.scrollTo(0, messageRef.curr);
     }
   }, [data]);
+
   return (
     <div style={{ height: "100% !important" }}>
       {data

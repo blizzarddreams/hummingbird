@@ -12,13 +12,13 @@ import UserTooltip from "./UserTooltip";
 
 interface MessagesProps {
   data: ChatData;
-  value: any;
+  value: number;
 }
 
 interface TabPanelProps {
   children?: React.ReactNode;
-  index: any;
-  value: any;
+  index: number;
+  value: number;
 }
 
 interface SocketUser {
@@ -59,6 +59,7 @@ const useStyles = makeStyles(() => ({
     padding: "0",
   },
 }));
+
 const TabPanel = (props: TabPanelProps): JSX.Element => {
   const { children, value, index, ...other } = props;
   return (
@@ -85,9 +86,7 @@ const Messages = ({ data, value }: MessagesProps): JSX.Element => {
   const handleTooltipClose = (): void => setOpen(false);
 
   useEffect(() => {
-    if (messageRef.current !== null) {
-      messageRef.current.scrollIntoView();
-    }
+    messageRef?.current?.scrollIntoView();
   }, [data]);
 
   return (

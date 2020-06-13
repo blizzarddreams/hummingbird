@@ -12,6 +12,6 @@
     "strict": true,
     "jsx": "react"
   },
-  "include": ["./*.ts", "./models/*.ts", "resources/*.ts"],
+  "include": ["./*.ts", "./models/*.ts", "resources/*.ts", "migrations/*.ts"],
   "exclude": ["node_modules"]
 }

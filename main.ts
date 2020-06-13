@@ -9,17 +9,13 @@ import http from "http";
 import redis from "redis";
 import flash from "express-flash";
 import csurf from "csurf";
-import socketio, { Server } from "socket.io";
+import socketio from "socket.io";
 import cors from "cors";
 import { passport } from "./authentication";
 import router from "./routes";
 import websocket from "./websocket";
 import path from "path";
 import { createConnection } from "typeorm";
-
-interface UserServer extends Server {
-  username?: string;
-}
 
 createConnection().then(() => {
   const app = express();
@@ -52,7 +48,7 @@ createConnection().then(() => {
     res.sendFile(path.join(__dirname, "/views/index.html"));
   });
 
-  const io: UserServer = socketio(server);
+  const io = socketio(server);
   websocket(io);
 
   const port = process.env.PORT || 8000;

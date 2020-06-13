@@ -1,1 +1,1 @@
-web: node build/main.js
+release: npm run migrate

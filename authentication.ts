@@ -97,7 +97,7 @@ passport.use(
     {
       clientID: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-      callbackURL: process.env.GITHUB_CALLBACK_URL as string,
+      callbackURL: process.env.GITHUB_CLIENT_URL as string,
       scope: ["user"],
     },
     (
@@ -118,7 +118,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL as string,
+      callbackURL: process.env.GOOGLE_CLIENT_URL as string,
       scope: ["openid profile email"],
     },
     (accessToken, refreshToken, profile: GoogleProfile, cb) => {

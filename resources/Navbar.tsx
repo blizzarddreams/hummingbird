@@ -10,6 +10,8 @@ import {
   ClickAwayListener,
   Box,
   Hidden,
+  Dialog,
+  DialogContent,
 } from "@material-ui/core";
 
 import {
@@ -73,6 +75,7 @@ const Navbar = ({
   const handleTooltipOpen = (): void => setOpen(true);
 
   const handleTooltipClose = (): void => setOpen(false);
+
   const handleLogOut = (): void => {
     fetch("/logout", {
       headers: {
@@ -117,27 +120,19 @@ const Navbar = ({
         </Box>
         <Box>
           {Cookies.get("email") ? (
-            <Box display="flex" flexDirection="row-reverse">
-              <ClickAwayListener onClickAway={handleTooltipClose}>
-                <Tooltip
-                  classes={{ tooltip: classes.tooltip }}
-                  title={<SettingsTooltip />}
-                  interactive={true}
-                  open={open}
-                  onClose={handleTooltipClose}
-                  disableFocusListener
-                  disableHoverListener
-                  disableTouchListener
-                >
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    onClick={handleTooltipOpen}
-                  >
-                    <Gravatar email={Cookies.get("email")!} size={4} />
-                  </Box>
-                </Tooltip>
-              </ClickAwayListener>
+            <Box display="flex" flexDirection="row-reverse" alignItems="center">
+              <Dialog open={open} onClose={handleTooltipClose}>
+                <SettingsTooltip handleTooltipClose={handleTooltipClose} />
+              </Dialog>
+              <Box
+                display="flex"
+                alignItems="center"
+                onClick={handleTooltipOpen}
+              >
+                <IconButton onClick={handleTooltipOpen}>
+                  <Gravatar email={Cookies.get("email")!} size={4} />
+                </IconButton>
+              </Box>
               <Link to={"/settings"}>
                 <IconButton className={classes.icons}>
                   <SettingsIcon />

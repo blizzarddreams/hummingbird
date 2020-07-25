@@ -31,6 +31,7 @@ interface StyleProps {
 }
 
 interface NavbarProps {
+  socket: SocketIOClient.Socket;
   toggleChannelList: (e: React.MouseEvent<HTMLButtonElement>) => void;
   toggleUserList: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
@@ -64,6 +65,7 @@ const useStyles = makeStyles(() => ({
 
 const Navbar = ({
   toggleChannelList,
+  socket,
   toggleUserList,
 }: NavbarProps): JSX.Element => {
   const darkMode = useContext(DarkModeContext);
@@ -122,7 +124,10 @@ const Navbar = ({
           {Cookies.get("email") ? (
             <Box display="flex" flexDirection="row-reverse" alignItems="center">
               <Dialog open={open} onClose={handleTooltipClose}>
-                <SettingsTooltip handleTooltipClose={handleTooltipClose} />
+                <SettingsTooltip
+                  handleTooltipClose={handleTooltipClose}
+                  socket={socket}
+                />
               </Dialog>
               <Box
                 display="flex"

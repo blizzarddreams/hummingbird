@@ -15,6 +15,8 @@ interface RequestUser {
   email: string;
 }
 
+type Mode = "online" | "offline" | "idle" | "dnd";
+
 interface SettingsError extends ValidationError {
   constraints: {};
 }
@@ -179,8 +181,13 @@ router.post(
     );
     if (!user) return false;
     user.status = req.body.status;
+    user.mode = req.body.mode as Mode;
     await user.save();
-    return res.json({ success: true, status: req.body.status });
+    return res.json({
+      success: true,
+      status: req.body.status,
+      mode: req.body.mode,
+    });
   },
 );
 
@@ -192,7 +199,7 @@ router.get(
       (req.user as RequestUser).id,
     );
     if (!user) return false;
-    return res.json({ success: true, status: user.status });
+    return res.json({ success: true, status: user.status, mode: user.mode });
   },
 );
 router.post(

@@ -7,6 +7,9 @@ interface SocketUser {
   username: string;
   color: string;
   email: string;
+  status: string;
+  mode: string;
+  typing: boolean;
 }
 
 interface SocketMessage {
@@ -25,6 +28,11 @@ interface SocketUserMessage {
   user?: SocketUser;
 }
 
+interface StatusAndModeUpdated {
+  status: string;
+  mode: string;
+}
+
 interface ConnectedSocketUser extends Socket {
   username: string;
 }
@@ -40,6 +48,9 @@ export default (io: UserServer): void => {
       username: user.username,
       color: user.color,
       email: user.email,
+      status: user.status,
+      mode: user.mode,
+      typing: false,
     };
   };
 
@@ -98,6 +109,30 @@ export default (io: UserServer): void => {
         socket.emit("you joined a room", { room: channel.name, userlist });
       });
       socket.emit("user authorized", await userData(socket.username));
+    });
+
+    socket.on("status and mode updated", async (data: StatusAndModeUpdated) => {
+      console.log("status updated");
+      console.log(data);
+      console.log(socket.username);
+      const user: User = await User.findOneOrFail({
+        username: socket.username,
+      });
+      console.log(user);
+      user.mode = data.mode;
+      user.status = data.status;
+      await user.save();
+
+      const rooms: string[] = Object.keys(socket.rooms).slice(1); // we don't want the first room.
+      rooms.forEach((room) => {
+        console.log(room);
+        io.in(room).emit("status and mode updated", {
+          username: socket.username,
+          status: data.status,
+          mode: data.mode,
+        });
+        console.log("EMITTED");
+      });
     });
 
     socket.on("new message", async (data: SocketUserMessage) => {
@@ -184,11 +219,22 @@ export default (io: UserServer): void => {
       }
     });
 
-    socket.on("get user list", async (room) => {
+    socket.on("get user list", async (room: string) => {
       const userlist = await userList(room);
       socket.emit("get user list", {
         room,
         userlist,
+      });
+    });
+
+    socket.on("user is typing", (room: string) => {
+      io.in(room).emit("user is typing", { room, username: socket.username });
+    });
+
+    socket.on("user stopped typing", (room: string) => {
+      io.in(room).emit("user stopped typing", {
+        room,
+        username: socket.username,
       });
     });
 

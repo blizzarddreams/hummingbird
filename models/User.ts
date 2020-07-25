@@ -69,6 +69,9 @@ export default class User extends BaseEntity {
   @Column({ nullable: true })
   status!: string;
 
+  @Column({ default: "online" })
+  mode!: string;
+
   @CreateDateColumn({ nullable: true })
   createdAt!: Date;
 

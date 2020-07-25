@@ -24,7 +24,10 @@ interface TabPanelProps {
 interface SocketUser {
   username: string;
   color: string;
+  mode: string;
+  status: string;
   email: string;
+  typing: boolean;
 }
 
 interface SocketMessage {

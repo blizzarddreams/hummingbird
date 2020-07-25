@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter, Switch } from "react-router-dom";
 import Chat from "./chat/Chat";
@@ -9,6 +9,7 @@ import {
   Brightness2 as MoonIcon,
   Brightness5 as SunIcon,
 } from "@material-ui/icons";
+import io from "socket.io-client";
 import Navbar from "./Navbar";
 import Settings from "./user/Settings";
 import Welcome from "./Welcome";
@@ -56,7 +57,10 @@ const useStyles = makeStyles(() => ({
   }),
 }));
 
+const socketio = io();
+
 const App = (): JSX.Element => {
+  const { current: socket } = useRef(socketio);
   const [darkMode, setDarkMode] = useState(
     Cookies.get("darkMode") === "true" ? true : false,
   );
@@ -91,12 +95,14 @@ const App = (): JSX.Element => {
       <DarkModeContext.Provider value={darkMode}>
         <BrowserRouter>
           <Navbar
+            socket={socket}
             toggleChannelList={toggleChannelList}
             toggleUserList={toggleUserList}
           />
           <Switch>
             <PrivateRoute path="/app">
               <Chat
+                socket={socket}
                 drawer={drawer}
                 toggleChannelList={toggleChannelList}
                 toggleUserList={toggleUserList}

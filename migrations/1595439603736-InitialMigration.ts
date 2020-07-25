@@ -1,11 +1,11 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class InitialMigration1589414651551 implements MigrationInterface {
-    name = 'InitialMigration1589414651551'
+export class InitialMigration1595439603736 implements MigrationInterface {
+    name = 'InitialMigration1595439603736'
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(`CREATE TABLE "message" ("id" SERIAL NOT NULL, "data" character varying NOT NULL, "createdAt" TIMESTAMP DEFAULT now(), "userId" integer, "channelId" integer, CONSTRAINT "PK_ba01f0a3e0123651915008bc578" PRIMARY KEY ("id"))`, undefined);
-        await queryRunner.query(`CREATE TABLE "user" ("id" SERIAL NOT NULL, "username" character varying NOT NULL, "password" character varying, "email" character varying, "githubId" character varying, "googleId" character varying, "color" character varying NOT NULL, "status" character varying, "createdAt" TIMESTAMP DEFAULT now(), CONSTRAINT "UQ_78a916df40e02a9deb1c4b75edb" UNIQUE ("username"), CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"), CONSTRAINT "UQ_0d84cc6a830f0e4ebbfcd6381dd" UNIQUE ("githubId"), CONSTRAINT "UQ_470355432cc67b2c470c30bef7c" UNIQUE ("googleId"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`, undefined);
+        await queryRunner.query(`CREATE TABLE "user" ("id" SERIAL NOT NULL, "username" character varying NOT NULL, "password" character varying, "email" character varying, "githubId" character varying, "googleId" character varying, "color" character varying NOT NULL, "status" character varying, "mode" character varying NOT NULL DEFAULT 'online', "createdAt" TIMESTAMP DEFAULT now(), CONSTRAINT "UQ_78a916df40e02a9deb1c4b75edb" UNIQUE ("username"), CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"), CONSTRAINT "UQ_0d84cc6a830f0e4ebbfcd6381dd" UNIQUE ("githubId"), CONSTRAINT "UQ_470355432cc67b2c470c30bef7c" UNIQUE ("googleId"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`, undefined);
         await queryRunner.query(`CREATE TABLE "channel" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "createdAt" TIMESTAMP DEFAULT now(), CONSTRAINT "UQ_800e6da7e4c30fbb0653ba7bb6c" UNIQUE ("name"), CONSTRAINT "PK_590f33ee6ee7d76437acf362e39" PRIMARY KEY ("id"))`, undefined);
         await queryRunner.query(`CREATE TABLE "user_channels_channel" ("userId" integer NOT NULL, "channelId" integer NOT NULL, CONSTRAINT "PK_01cb58c2f493472e335712d76c7" PRIMARY KEY ("userId", "channelId"))`, undefined);
         await queryRunner.query(`CREATE INDEX "IDX_9c701cabd952769d5c75844343" ON "user_channels_channel" ("userId") `, undefined);

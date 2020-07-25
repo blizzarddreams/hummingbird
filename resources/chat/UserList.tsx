@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -11,15 +11,26 @@ import {
 } from "@material-ui/core";
 import Gravatar from "../util/Gravatar";
 import UserTooltip from "./UserTooltip";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
+
 interface UserListProps {
   data: ChatData;
   value: number;
+  socket: SocketIOClient.Socket;
 }
 
 interface SocketUser {
   username: string;
   color: string;
   email: string;
+  mode: string;
+  status: string;
+  typing: boolean;
+}
+
+interface Open {
+  [key: string]: boolean;
 }
 
 interface SocketMessage {
@@ -47,62 +58,95 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-const UserList = ({ data, value }: UserListProps): JSX.Element => {
+const UserList = ({ data, value, socket }: UserListProps): JSX.Element => {
   const room = Object.keys(data)[value];
   const classes = useStyles();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<Open>({} as Open);
 
-  const handleTooltipOpen = (): void => setOpen(true);
+  const handleTooltipOpen = (
+    e: React.MouseEvent<HTMLElement, MouseEvent>,
+  ): void => {
+    console.log("opening");
+    const username = e.currentTarget.getAttribute("data-username");
+    console.log(username);
+    setOpen({ ...open, [username as string]: true });
+  };
 
-  const handleTooltipClose = (): void => setOpen(false);
+  const handleTooltipClose = (e: React.ChangeEvent<{}>): void => {
+    const updatedOpen = {} as Open;
+    Object.keys(open).forEach((item) => {
+      updatedOpen[item] = false;
+    });
+    console.log(updatedOpen);
+    setOpen(updatedOpen);
+  };
 
   return (
-    <Container>
-      <Box style={{ textAlign: "center" }}>
-        {data[room] ? (
-          <>
-            <Typography variant="h4" style={{ fontWeight: "bold" }}>
-              {data[room].userlist.length}{" "}
-              {data[room].userlist.length === 1 ? "User" : "Users"}
-            </Typography>
-            {data[room].userlist.map((user) => (
-              <Box className={classes.user} key={user.username}>
-                <ClickAwayListener onClickAway={handleTooltipClose}>
-                  <Tooltip
-                    key={user.username}
-                    classes={{ tooltip: classes.tooltip }}
-                    open={open}
-                    onClose={handleTooltipClose}
-                    disableFocusListener
-                    disableHoverListener
-                    disableTouchListener
-                    placement="left-start"
-                    interactive={true}
-                    title={<UserTooltip username={user.username} />}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="row"
+    <>
+      {data && (
+        <Container>
+          <Box style={{ textAlign: "center" }}>
+            {data[room] ? (
+              <>
+                <Typography variant="h4" style={{ fontWeight: "bold" }}>
+                  {data[room].userlist.length}{" "}
+                  {data[room].userlist.length === 1 ? "User" : "Users"}
+                </Typography>
+                {data[room].userlist.map((user) => (
+                  <Box className={classes.user} key={user.username}>
+                    <Tooltip
                       key={user.username}
-                      onClick={handleTooltipOpen}
-                      justifyContent="center"
+                      data-username={user.username}
+                      classes={{ tooltip: classes.tooltip }}
+                      open={open[user.username] || false}
+                      onClose={handleTooltipClose}
+                      disableFocusListener
+                      disableHoverListener
+                      disableTouchListener
+                      PopperProps={{
+                        disablePortal: true,
+                      }}
+                      interactive={true}
+                      title={
+                        <ClickAwayListener onClickAway={handleTooltipClose}>
+                          <Box>
+                            <UserTooltip username={user.username} />
+                          </Box>
+                        </ClickAwayListener>
+                      }
                     >
-                      <Gravatar email={user.email} size={4} />
-                      <Typography
-                        variant="h5"
-                        style={{ color: user.color, fontWeight: "bold" }}
+                      <Box
+                        display="flex"
+                        flexDirection="row"
+                        key={user.username}
+                        data-username={user.username}
+                        onClick={handleTooltipOpen}
+                        justifyContent="center"
+                        alignItems="center"
                       >
-                        {user.username}
-                      </Typography>
-                    </Box>
-                  </Tooltip>
-                </ClickAwayListener>
-              </Box>
-            ))}
-          </>
-        ) : null}
-      </Box>
-    </Container>
+                        <Gravatar
+                          email={user.email}
+                          size={4}
+                          userlist
+                          mode={user.mode}
+                          typing={user.typing}
+                        />
+                        <Typography
+                          variant="h5"
+                          style={{ color: user.color, fontWeight: "bold" }}
+                        >
+                          {user.username}
+                        </Typography>
+                      </Box>
+                    </Tooltip>
+                  </Box>
+                ))}
+              </>
+            ) : null}
+          </Box>
+        </Container>
+      )}
+    </>
   );
 };
 

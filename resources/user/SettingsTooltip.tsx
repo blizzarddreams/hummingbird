@@ -9,15 +9,23 @@ import {
   TextField,
   darken,
   Button,
+  RadioGroup,
+  FormControl,
+  FormControlLabel,
+  Radio,
 } from "@material-ui/core";
 import DarkModeContext from "../DarkMode";
 import Cookies from "js-cookie";
+import { Socket } from "socket.io-client";
 
 interface StyleProps {
   darkMode: boolean;
 }
 
+type Mode = "online" | "offline" | "idle" | "dnd";
+
 interface SettingsTooltipProps {
+  socket: SocketIOClient.Socket;
   handleTooltipClose: () => void;
 }
 
@@ -61,13 +69,24 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: "center",
     flexDirection: "column",
   },
+  online: {
+    color: "green",
+  },
+  idle: {
+    color: "yellow",
+  },
+  dnd: {
+    color: "red",
+  },
 }));
 
 const SettingsTooltip = ({
   handleTooltipClose,
+  socket,
 }: SettingsTooltipProps): JSX.Element => {
   const darkMode = useContext(DarkModeContext);
   const [status, setStatus] = useState("");
+  const [mode, setMode] = useState<Mode>(null!);
   const classes = useStyles({ darkMode });
 
   useEffect(() => {
@@ -80,6 +99,7 @@ const SettingsTooltip = ({
       .then((data) => {
         if (data.success) {
           setStatus(data.status);
+          setMode(data.mode as Mode);
         }
       });
   }, []);
@@ -87,12 +107,16 @@ const SettingsTooltip = ({
     setStatus(e.target.value);
   };
 
+  const handleRadio = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setMode(e.target.value as Mode);
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     fetch("/user/status/update", {
       method: "POST",
       credentials: "include",
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status, mode }),
       headers: {
         "X-CSRF-TOKEN": Cookies.get("XSRF-TOKEN")!,
         "Content-Type": "application/json",
@@ -100,13 +124,43 @@ const SettingsTooltip = ({
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) setStatus(data.status);
+        if (data.success) {
+          socket.emit("status and mode updated", {
+            status: data.status,
+            mode: data.mode,
+          });
+          console.log("updated in seettingstooltip");
+          setStatus(data.status);
+          setMode(data.mode as Mode);
+        }
       });
   };
   return (
     <Card classes={{ root: classes.card }}>
       <CardContent className={classes.content}>
         <form onSubmit={handleSubmit}>
+          <FormControl>
+            <RadioGroup value={mode} onChange={handleRadio}>
+              <FormControlLabel
+                label="Online"
+                labelPlacement="start"
+                value="online"
+                control={<Radio className={classes.online} />}
+              />
+              <FormControlLabel
+                label="Idle"
+                labelPlacement="start"
+                value="idle"
+                control={<Radio className={classes.idle} />}
+              />
+              <FormControlLabel
+                label="Do Not Disturb"
+                labelPlacement="start"
+                value="dnd"
+                control={<Radio className={classes.dnd} />}
+              />
+            </RadioGroup>
+          </FormControl>
           <TextField
             name="Status"
             id="outlined-basic"

@@ -18,6 +18,9 @@ interface SocketUser {
   username: string;
   color: string;
   email: string;
+  mode: string;
+  status: string;
+  typing: boolean;
 }
 
 interface SocketMessage {
@@ -25,6 +28,12 @@ interface SocketMessage {
   message: string;
   timestamp: Date;
   room: string;
+}
+
+interface StatusAndModeUpdated {
+  status: string;
+  mode: string;
+  username: string;
 }
 
 type SocketUserList = SocketUser[];
@@ -39,6 +48,11 @@ interface ChatData {
 interface AuthData {
   success: boolean;
   id: string;
+}
+
+interface UserIsTyping {
+  username: string;
+  room: string;
 }
 
 interface YouJoinedARoom {
@@ -56,6 +70,7 @@ interface StyleProps {
 }
 
 interface ChatProps {
+  socket: SocketIOClient.Socket;
   drawer: {
     userList: boolean;
     channelList: boolean;
@@ -65,8 +80,6 @@ interface ChatProps {
 }
 
 type ADifferentUserIsDisconnecting = ADifferentUserJoinedARoom;
-
-const socketio = io();
 
 const useStyles = makeStyles((theme: Theme) => ({
   chatBox: {
@@ -125,12 +138,12 @@ const Chat = ({
   drawer,
   toggleUserList,
   toggleChannelList,
+  socket,
 }: ChatProps): JSX.Element => {
   const darkMode = useContext(DarkModeContext);
   const classes = useStyles({ darkMode });
-  const { current: socket } = useRef(socketio);
   const [value, setValue] = useState(0);
-
+  const [typing, setTyping] = useState<NodeJS.Timeout | number>(null!);
   const [channels, setChannels] = useState<ChatData>({} as ChatData);
   const [newMessage, setNewMessage] = useState("");
 
@@ -151,8 +164,6 @@ const Chat = ({
     // const tag: string = (e.target as HTMLDivElement).tagName;
     const index = Object.keys(channels)[newValue];
     if (index !== undefined) {
-      //console.log((e.target as HTMLDivElement).tagName);
-      console.log(`new value is ${newValue}`);
       setValue(newValue);
     }
   };
@@ -164,8 +175,7 @@ const Chat = ({
       // room = room as string;
       const indexOfRoom = Object.keys(channels).indexOf(room);
       delete channels[room];
-      console.log(`index of room before delete is ${indexOfRoom}`);
-      console.log(`current channel is ${value}`);
+
       if (value === indexOfRoom) {
         setChannels({ ...channels });
         handleTabChange(e, 0);
@@ -176,7 +186,16 @@ const Chat = ({
   const handleNewMessageChange = (
     e: React.ChangeEvent<HTMLInputElement>,
   ): void => {
+    const room = Object.keys(channels)[value];
+    socket.emit("user is typing", room);
     setNewMessage(e.target.value);
+
+    clearTimeout(typing as NodeJS.Timeout);
+    setTyping(
+      setTimeout(() => {
+        socket.emit("user stopped typing", room);
+      }, 5000),
+    );
   };
 
   const handleNewMessageSubmit = (
@@ -195,6 +214,53 @@ const Chat = ({
         [data.room]: {
           userlist: channels[data.room].userlist,
           messages: channels[data.room].messages.concat(data),
+        },
+      });
+    });
+
+    socket.on("user is typing", (data: UserIsTyping) => {
+      setChannels({
+        ...channels,
+        [data.room]: {
+          messages: channels[data.room].messages,
+          userlist: channels?.[data.room]?.userlist.map((user) => {
+            if (user.username === data.username) {
+              user.typing = true;
+            }
+            return user;
+          }),
+        },
+      });
+    });
+
+    socket.on("status and mode updated", (data: StatusAndModeUpdated) => {
+      console.log("received in chat.tsx");
+      const updatedChannels = {} as ChatData;
+      Object.keys(channels).map((room) => {
+        updatedChannels[room] = channels[room];
+        updatedChannels[room].userlist.map((user) => {
+          if (user.username === data.username) {
+            user.status = data.status;
+            user.mode = data.mode;
+          }
+          return user;
+        });
+      });
+      console.log(updatedChannels);
+      setChannels(updatedChannels);
+    });
+
+    socket.on("user stopped typing", (data: UserIsTyping) => {
+      setChannels({
+        ...channels,
+        [data.room]: {
+          messages: channels[data.room].messages,
+          userlist: channels?.[data.room]?.userlist.map((user) => {
+            if (user.username === data.username) {
+              user.typing = false;
+            }
+            return user;
+          }),
         },
       });
     });
@@ -241,6 +307,9 @@ const Chat = ({
       socket.off("new message");
       socket.off("a different user joined a room");
       socket.off("a different user is disconnecting");
+      socket.off("user is typing");
+      socket.off("user stopped typing");
+      socket.off("status and mode updated");
     };
   }, [channels]);
 
@@ -260,80 +329,84 @@ const Chat = ({
 
   return (
     <>
-      <Hidden smUp>
-        <Grid container className={classes.chatBox} spacing={0}>
-          <SwipeableDrawer
-            anchor={"left"}
-            data-name={"channelList"}
-            open={drawer.channelList}
-            onClose={toggleChannelList}
-            onOpen={toggleChannelList}
-            classes={{ paper: classes.drawer }}
-          >
-            <ChannelList
-              data={channels}
-              value={value}
-              handleTabChange={handleTabChange}
-              handleChannelLeave={handleChannelLeave}
-            />
-          </SwipeableDrawer>
-          <SwipeableDrawer
-            anchor={"right"}
-            data-name={"userList"}
-            open={drawer.userList}
-            onClose={toggleUserList}
-            onOpen={toggleUserList}
-            classes={{ paper: classes.drawer }}
-          >
-            <UserList data={channels} value={value} />
-          </SwipeableDrawer>
-          <Grid item xs={12} className={classes.chatBoxColumn}>
-            <Messages data={channels} value={value} />
-          </Grid>
-          <Grid item xs={12}>
-            <form onSubmit={handleNewMessageSubmit}>
-              <TextField
-                name="message"
-                fullWidth
-                variant="outlined"
-                onChange={handleNewMessageChange}
-                value={newMessage}
-                classes={{ root: classes.input }}
-              />
-            </form>
-          </Grid>
-        </Grid>
-      </Hidden>
-      <Hidden xsDown>
-        <Grid container className={classes.chatBox} spacing={0}>
-          <Grid item xs={2} className={classes.chatBoxColumn}>
-            <ChannelList
-              data={channels}
-              value={value}
-              handleTabChange={handleTabChange}
-              handleChannelLeave={handleChannelLeave}
-            />
-          </Grid>
-          <Grid item xs={8} className={classes.chatBoxColumn}>
-            <Messages data={channels} value={value} />
-          </Grid>
-          <Grid item xs={2} className={classes.chatBoxColumn}>
-            <UserList data={channels} value={value} />
-          </Grid>
-          <Grid item xs={12} className={classes.newMessageColumn}>
-            <form onSubmit={handleNewMessageSubmit}>
-              <TextField
-                name="message"
-                fullWidth
-                variant="outlined"
-                onChange={handleNewMessageChange}
-                value={newMessage}
-                classes={{ root: classes.input }}
-              />
-            </form>
-          </Grid>
-        </Grid>
-      </Hidden>
+      {channels && (
+        <>
+          <Hidden smUp>
+            <Grid container className={classes.chatBox} spacing={0}>
+              <SwipeableDrawer
+                anchor={"left"}
+                data-name={"channelList"}
+                open={drawer.channelList}
+                onClose={toggleChannelList}
+                onOpen={toggleChannelList}
+                classes={{ paper: classes.drawer }}
+              >
+                <ChannelList
+                  data={channels}
+                  value={value}
+                  handleTabChange={handleTabChange}
+                  handleChannelLeave={handleChannelLeave}
+                />
+              </SwipeableDrawer>
+              <SwipeableDrawer
+                anchor={"right"}
+                data-name={"userList"}
+                open={drawer.userList}
+                onClose={toggleUserList}
+                onOpen={toggleUserList}
+                classes={{ paper: classes.drawer }}
+              >
+                <UserList data={channels} value={value} socket={socket} />
+              </SwipeableDrawer>
+              <Grid item xs={12} className={classes.chatBoxColumn}>
+                <Messages data={channels} value={value} />
+              </Grid>
+              <Grid item xs={12}>
+                <form onSubmit={handleNewMessageSubmit}>
+                  <TextField
+                    name="message"
+                    fullWidth
+                    variant="outlined"
+                    onChange={handleNewMessageChange}
+                    value={newMessage}
+                    classes={{ root: classes.input }}
+                  />
+                </form>
+              </Grid>
+            </Grid>
+          </Hidden>
+          <Hidden xsDown>
+            <Grid container className={classes.chatBox} spacing={0}>
+              <Grid item xs={2} className={classes.chatBoxColumn}>
+                <ChannelList
+                  data={channels}
+                  value={value}
+                  handleTabChange={handleTabChange}
+                  handleChannelLeave={handleChannelLeave}
+                />
+              </Grid>
+              <Grid item xs={8} className={classes.chatBoxColumn}>
+                <Messages data={channels} value={value} />
+              </Grid>
+              <Grid item xs={2} className={classes.chatBoxColumn}>
+                <UserList data={channels} value={value} socket={socket} />
+              </Grid>
+              <Grid item xs={12} className={classes.newMessageColumn}>
+                <form onSubmit={handleNewMessageSubmit}>
+                  <TextField
+                    name="message"
+                    fullWidth
+                    variant="outlined"
+                    onChange={handleNewMessageChange}
+                    value={newMessage}
+                    classes={{ root: classes.input }}
+                  />
+                </form>
+              </Grid>
+            </Grid>
+          </Hidden>
+        </>
+      )}
     </>
   );
 };

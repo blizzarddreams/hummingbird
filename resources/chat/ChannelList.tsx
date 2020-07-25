@@ -11,6 +11,9 @@ interface SocketUser {
   username: string;
   color: string;
   email: string;
+  mode: string;
+  status: string;
+  typing: boolean;
 }
 
 interface SocketMessage {
@@ -61,7 +64,6 @@ const ChannelList = ({
   handleChannelLeave,
 }: UserListProps): JSX.Element => {
   const classes = useStyles();
-  console.log("in channellist, value is " + value);
 
   return (
     <Tabs

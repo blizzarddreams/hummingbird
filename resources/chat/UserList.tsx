@@ -56,9 +56,13 @@ const useStyles = makeStyles((theme: Theme) => ({
   user: {
     margin: theme.spacing(1),
   },
+  usernameBox: {
+    paddingLeft: "1rem",
+  },
   username: {
     fontWeight: "bold",
-    paddingLeft: "1rem",
+    //paddingLeft: "1rem",
+    lineHeight: "1rem",
   },
 }));
 
@@ -140,13 +144,25 @@ const UserList = ({ data, value, socket }: UserListProps): JSX.Element => {
                           mode={user.mode}
                           typing={user.typing}
                         />
-                        <Typography
-                          variant="h5"
-                          className={classes.username}
-                          style={{ color: user.color }}
+                        <Box
+                          display="flex"
+                          flexDirection="column"
+                          alignItems="flex-start"
+                          className={classes.usernameBox}
                         >
-                          {user.username}
-                        </Typography>
+                          <Typography
+                            variant="h6"
+                            className={classes.username}
+                            style={{ color: user.color }}
+                          >
+                            {user.username}
+                          </Typography>
+                          <Typography variant="caption" title={user.status}>
+                            {user?.status?.length > 24
+                              ? user?.status?.substring(0, 24) + "...."
+                              : user?.status}
+                          </Typography>
+                        </Box>
                       </Box>
                     </Tooltip>
                   </Box>

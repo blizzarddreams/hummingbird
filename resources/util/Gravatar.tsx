@@ -58,19 +58,23 @@ const Gravatar = ({
     .update(email || "")
     .digest("hex");
   const classes = useStyles({ size, darkMode });
+  let statusTitle;
   let statusBadgeClass;
   let statusBadgeIcon;
   if (userlist) {
     switch (mode) {
       case "online":
+        statusTitle = "Online";
         statusBadgeClass = classes.online;
         statusBadgeIcon = faCircle;
         break;
       case "idle":
+        statusTitle = "Idle";
         statusBadgeClass = classes.idle;
         statusBadgeIcon = faMoon;
         break;
       case "dnd":
+        statusTitle = "Do Not Disturb";
         statusBadgeClass = classes.dnd;
         statusBadgeIcon = faTimesCircle;
     }
@@ -80,7 +84,7 @@ const Gravatar = ({
       {userlist ? (
         <Badge
           overlap="circle"
-          title={mode!.substring(0, 1).toUpperCase() + mode!.substring(1)}
+          title={statusTitle}
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           badgeContent={
             typing ? (

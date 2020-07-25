@@ -116,9 +116,7 @@ const UserList = ({ data, value, socket }: UserListProps): JSX.Element => {
                       disableFocusListener
                       disableHoverListener
                       disableTouchListener
-                      PopperProps={{
-                        disablePortal: true,
-                      }}
+                      placement="top-start"
                       interactive={true}
                       title={
                         <ClickAwayListener onClickAway={handleTooltipClose}>

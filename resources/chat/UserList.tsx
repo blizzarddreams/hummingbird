@@ -56,6 +56,10 @@ const useStyles = makeStyles((theme: Theme) => ({
   user: {
     margin: theme.spacing(1),
   },
+  username: {
+    fontWeight: "bold",
+    paddingLeft: "1rem",
+  },
 }));
 
 const UserList = ({ data, value, socket }: UserListProps): JSX.Element => {
@@ -93,7 +97,12 @@ const UserList = ({ data, value, socket }: UserListProps): JSX.Element => {
                   {data[room].userlist.length === 1 ? "User" : "Users"}
                 </Typography>
                 {data[room].userlist.map((user) => (
-                  <Box className={classes.user} key={user.username}>
+                  <Box
+                    className={classes.user}
+                    key={user.username}
+                    display="flex"
+                    flexDirection="row"
+                  >
                     <Tooltip
                       key={user.username}
                       data-username={user.username}
@@ -133,7 +142,8 @@ const UserList = ({ data, value, socket }: UserListProps): JSX.Element => {
                         />
                         <Typography
                           variant="h5"
-                          style={{ color: user.color, fontWeight: "bold" }}
+                          className={classes.username}
+                          style={{ color: user.color }}
                         >
                           {user.username}
                         </Typography>

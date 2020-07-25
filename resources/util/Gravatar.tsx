@@ -84,7 +84,11 @@ const Gravatar = ({
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           badgeContent={
             typing ? (
-              <FontAwesomeIcon icon={faSpinner} spin />
+              <FontAwesomeIcon
+                icon={faSpinner}
+                className={`${statusBadgeClass} ${classes.badgeBackground}`}
+                spin
+              />
             ) : (
               <FontAwesomeIcon
                 icon={statusBadgeIcon as IconDefinition}

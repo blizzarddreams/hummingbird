@@ -126,7 +126,7 @@
     "react-router-dom": "^5.1.2",
     "redis": "^2.8.0",
     "reflect-metadata": "^0.1.10",
-    "sanitize-html": "^1.21.1",
+    "sanitize-html": "^2.3.2",
     "sass-loader": "^8.0.2",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
